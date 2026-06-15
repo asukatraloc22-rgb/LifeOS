@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#22222e;
+  --border:#2a2a38;--border2:#353545;
+  --text:#f0f0f8;--text2:#9090a8;--text3:#5a5a72;
+  --accent:#6c63ff;--accent2:#a78bfa;--accent3:#38bdf8;
+  --green:#34d399;--amber:#fbbf24;--coral:#f87171;--pink:#f472b6;
+  --r:12px;--rs:8px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+.app{display:flex;height:100vh}
+.sb{width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.logo-t{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.logo-t span{color:var(--accent2)}
+.logo-s{font-size:9px;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-top:2px}
+.ns{padding:12px 9px 4px}.nl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:0 7px;margin-bottom:5px;font-weight:500}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;width:100%;text-align:left;transition:all .15s}
+.ni:hover{background:var(--bg3);color:var(--text)}
+.ni.active{background:linear-gradient(135deg,rgba(108,99,255,.18),rgba(167,139,250,.07));color:var(--text);border:1px solid rgba(108,99,255,.25)}
+.nic{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ni.active .nic{background:var(--accent);box-shadow:0 0 10px rgba(108,99,255,.4)}
+.nbadge{margin-left:auto;background:var(--accent);color:#fff;font-size:9px;padding:1px 5px;border-radius:20px;font-weight:600}
+.sf{margin-top:auto;padding:12px 9px;border-top:1px solid var(--border)}
+.uc{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--rs);background:var(--bg3)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.page{display:none;padding:22px;animation:fadeIn .18s ease}.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.03em;font-family:'Syne',sans-serif}
+.page-sub{font-size:11px;color:var(--text2);margin-top:3px;margin-bottom:18px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.csm{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mb12{margin-bottom:12px}.mb8{margin-bottom:8px}
+.sl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;font-weight:500}
+.sv{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.sc{font-size:10px;margin-top:3px}.up{color:var(--green)}.down{color:var(--coral)}.neu{color:var(--text3)}
+.pt{height:5px;background:var(--bg4);border-radius:3px;margin-top:7px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .5s ease}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:500}
+.tp{background:rgba(108,99,255,.15);color:var(--accent2);border:1px solid rgba(108,99,255,.2)}
+.tg{background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+.ta{background:rgba(251,191,36,.12);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
+.tc{background:rgba(248,113,113,.12);color:var(--coral);border:1px solid rgba(248,113,113,.2)}
+.tb{background:rgba(56,189,248,.12);color:var(--accent3);border:1px solid rgba(56,189,248,.2)}
+.tk{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.ri{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ri:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sec{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.hr{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs);margin-bottom:7px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s}
+.hr:hover{border-color:var(--border2)}
+.hc{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border2);background:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.hc.done{background:var(--green);border-color:var(--green)}.hr:last-child{margin-bottom:0}
+.tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:var(--rs);border:1px solid var(--border)}
+.tab{flex:1;padding:7px 8px;border-radius:6px;border:none;background:none;color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s}
+.tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.28);border-radius:var(--rs);color:var(--accent2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.add-btn:hover{background:rgba(108,99,255,.22)}
+.add-btn.green{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.28);color:var(--green)}
+.add-btn.amber{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.28);color:var(--amber)}
+.add-btn.coral{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.28);color:var(--coral)}
+.add-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.pb{padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text3);font-size:9px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pb.on{background:rgba(108,99,255,.15);color:var(--accent2);border-color:rgba(108,99,255,.3)}
+.ibtn{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:4px;font-size:11px;color:var(--text3);transition:all .15s;line-height:1}
+.ibtn:hover{background:var(--bg4);color:var(--text2)}.ibtn.edit:hover{color:var(--accent2)}.ibtn.del:hover{color:var(--coral)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:500}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:22px;width:340px;max-height:88vh;overflow-y:auto}
+.modal h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px}
+.field{margin-bottom:11px}
+.field label{font-size:10px;color:var(--text3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);padding:8px 11px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field select option{background:var(--bg3)}.field textarea{resize:none;height:72px;line-height:1.5}
+.mbts{display:flex;gap:8px;margin-top:16px}
+.btn-ok{flex:1;padding:9px;background:var(--accent);border:none;border-radius:var(--rs);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-ok:hover{opacity:.85}
+.btn-no{padding:9px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.conseil{background:linear-gradient(135deg,rgba(108,99,255,.1),rgba(56,189,248,.06));border:1px solid rgba(108,99,255,.22);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.conseil-icon{font-size:20px;margin-bottom:8px}.conseil-title{font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:6px}.conseil-text{font-size:11px;color:var(--text2);line-height:1.7}
+.conseil.warn{background:linear-gradient(135deg,rgba(248,113,113,.08),rgba(251,191,36,.05));border-color:rgba(248,113,113,.2)}.conseil.warn .conseil-title{color:var(--coral)}
+.conseil.good{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(56,189,248,.05));border-color:rgba(52,211,153,.2)}.conseil.good .conseil-title{color:var(--green)}
+.conseil.amber{background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(248,113,113,.04));border-color:rgba(251,191,36,.2)}.conseil.amber .conseil-title{color:var(--amber)}
+.obj-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:8px}
+.proj-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:13px;transition:border-color .15s;cursor:pointer}
+.proj-card:hover{border-color:var(--border2)}.proj-bar{height:3px;background:var(--bg4);border-radius:2px;margin:7px 0 5px;overflow:hidden}
+.skill-row{margin-bottom:9px}
+.db-table{width:100%;border-collapse:collapse;font-size:11px}
+.db-table th{padding:8px 10px;background:var(--bg3);color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.06em;font-weight:500;text-align:left;border-bottom:1px solid var(--border)}
+.db-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2)}.db-table tr:last-child td{border-bottom:none}.db-table tr:hover td{background:rgba(255,255,255,.02)}
+.kb-col-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding:5px 10px;border-radius:6px;text-align:center}
+.kb-card{border-radius:var(--rs);padding:10px;margin-bottom:8px}
+.day-cell{background:var(--bg3);border-radius:6px;padding:8px;border:1px solid var(--border)}.day-lbl{font-size:8px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;font-weight:500}
+.session-pill{border-radius:4px;padding:4px 6px;font-size:9px;margin-bottom:4px}
+.sp-blue{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.25);color:var(--accent2)}
+.sp-green{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:var(--green)}
+.sp-rest{background:var(--bg4);border:1px solid var(--border);color:var(--text3)}
+.play-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px;margin-bottom:8px;transition:border-color .15s}
+.play-card:hover{border-color:rgba(108,99,255,.3)}
+.lc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lc-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg4);border-radius:6px;margin-bottom:5px;border:1px solid var(--border)}
+.lc-item-name{flex:1;font-size:12px}.lc-item-amount{font-size:11px;color:var(--amber);margin-right:4px}
+.empty{text-align:center;padding:24px;color:var(--text3);font-size:12px}.empty-icon{font-size:28px;margin-bottom:8px}
+.ia-section{margin-bottom:20px}
+.ia-section-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ia-score{display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:var(--rs);padding:12px;margin-bottom:10px;border:1px solid var(--border)}
+.ia-score-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;line-height:1}
+.ia-score-label{font-size:11px;color:var(--text2);line-height:1.5}
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:32px;width:320px;text-align:center}
+.login-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:6px}
+.login-logo span{color:var(--accent2)}
+.login-sub{font-size:11px;color:var(--text3);margin-bottom:28px}
+.login-error{font-size:11px;color:var(--coral);margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Life<span>OS</span></div>
+    <div class="login-sub">Ton univers personnel</div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="login-pwd" placeholder="Entrez votre mot de passe" autocomplete="current-password"></div>
+    <button class="btn-ok" id="login-btn" style="width:100%;margin-top:4px">Connexion</button>
+    <div class="login-error" id="login-error"></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:16px">Mot de passe par defaut : <strong style="color:var(--text2)">lifeos2025</strong></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="m-title">Ajouter</h3>
+    <div id="m-body"></div>
+    <div class="mbts">
+      <button class="btn-no" id="m-cancel-btn">Annuler</button>
+      <button class="btn-ok" id="m-ok-btn">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+<aside class="sb">
+  <div class="logo"><div class="logo-t">Life<span>OS</span></div><div class="logo-s">Ton univers personnel</div></div>
+  <div class="ns"><div class="nl">Vue d'ensemble</div>
+    <button class="ni active" data-nav="dashboard"><div class="nic">&#x26A1;</div>Dashboard</button>
+  </div>
+  <div class="ns"><div class="nl">Vie perso</div>
+    <button class="ni" data-nav="finance"><div class="nic">&#x1F4B0;</div>Finance</button>
+    <button class="ni" data-nav="basket"><div class="nic">&#x1F3C0;</div>Basket<span class="nbadge" id="badge-basket">0</span></button>
+    <button class="ni" data-nav="routine"><div class="nic">&#x1F525;</div>Routine</button>
+  </div>
+  <div class="ns"><div class="nl">Vie pro</div>
+    <button class="ni" data-nav="workspace"><div class="nic">&#x1F4BC;</div>Workspace</button>
+    <button class="ni" data-nav="database"><div class="nic">&#x1F5C4;</div>Database</button>
+  </div>
+  <div class="sf">
+    <div class="uc"><div class="av">T</div><div><div style="font-size:12px;font-weight:500">Toi</div><div style="font-size:10px;color:var(--text3)">Life OS v1.2</div></div></div>
+    <button onclick="logout()" style="width:100%;margin-top:8px;padding:6px;background:none;border:1px solid var(--border);border-radius:var(--rs);color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Se deconnecter</button>
+  </div>
+</aside>
+<main class="main">
+
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Bonjour &#x1F44B;</div>
+  <div class="page-sub" id="dash-date">Chargement...</div>
+  <div class="g4 mb12">
+    <div class="csm"><div class="sl">Epargne totale</div><div class="sv" id="d-epargne" style="color:var(--green)">0 Ar</div><div class="sc up" id="d-epargne-sub">--</div></div>
+    <div class="csm"><div class="sl">Objectifs actifs</div><div class="sv" id="d-obj">0</div><div class="sc neu" id="d-obj-sub">--</div></div>
+    <div class="csm"><div class="sl">Seance basket</div><div class="sv" style="color:var(--accent2)" id="d-basket">--</div><div class="sc neu" id="d-basket-sub">Aucune prevue</div></div>
+    <div class="csm"><div class="sl">Routine</div><div class="sv" style="color:var(--amber)" id="d-routine">0/0</div><div class="sc neu">habitudes</div></div>
+  </div>
+  <div class="g2 mb12" style="align-items:start">
+    <div class="card" style="padding:13px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div><div class="sec" style="margin-bottom:1px">Croissance de l'epargne</div><div style="font-size:9px;color:var(--text3)">Cumul mensuel - Ariary</div></div>
+        <div style="display:flex;gap:4px">
+          <button class="pb on" id="pb-6m">6M</button>
+          <button class="pb" id="pb-1a">1A</button>
+          <button class="pb" id="pb-3a">3A</button>
+        </div>
+      </div>
+      <div style="position:relative;height:120px"><canvas id="gc"></canvas></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text3)">Depart <span id="vs" style="color:var(--text2)">0 Ar</span></div>
+        <div style="font-size:9px;color:var(--green)">Actuel <span id="vn">0 Ar</span></div>
+        <div style="font-size:9px;color:var(--accent2)">Proj. <span id="vp">--</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card" style="padding:13px"><div class="sec">Skills basket</div><div id="d-skills-list"></div></div>
+      <div class="card" style="padding:13px"><div class="sec">Taches urgentes</div><div id="d-tasks-list"></div></div>
+    </div>
+  </div>
+  <div class="card" style="padding:12px 14px">
+    <div class="sec" style="margin-bottom:10px">Objectifs financiers</div>
+    <div class="g3" id="d-obj-fin"></div>
+  </div>
+</div>
+
+<div class="page" id="page-finance">
+  <div class="page-title">Finance &#x1F4B0;</div>
+  <div class="page-sub">Revenus - Depenses - Objectifs - Courses - Analyse</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="transactions" data-group="tf">&#x1F4B8; Transactions</button>
+    <button class="tab" data-tab="objectifs" data-group="tf">&#x1F3AF; Objectifs</button>
+    <button class="tab" data-tab="courses" data-group="tf">&#x1F6D2; Courses</button>
+    <button class="tab" data-tab="ia" data-group="tf">&#x1F4CA; Analyse</button>
+  </div>
+  <div id="tf-transactions">
+    <div class="g3 mb12">
+      <div class="csm"><div class="sl">Revenus (mois)</div><div class="sv" id="fin-rev" style="color:var(--green)">0 Ar</div></div>
+      <div class="csm"><div class="sl">Depenses (mois)</div><div class="sv" id="fin-dep" style="color:var(--coral)">0 Ar</div></div>
+      <div class="csm"><div class="sl">Epargne nette</div><div class="sv" id="fin-net" style="color:var(--amber)">0 Ar</div></div>
+    </div>
+    <div class="add-row">
+      <button class="add-btn green" data-modal="revenu">+ Revenu</button>
+      <button class="add-btn coral" data-modal="depense">+ Depense</button>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="sec">Transactions recentes</div><div id="tx-list"><div class="empty"><div class="empty-icon">&#x1F4B8;</div>Aucune transaction</div></div></div>
+      <div class="card"><div class="sec">Par categorie</div><div id="cat-list"><div class="empty"><div class="empty-icon">&#x1F4CA;</div>Aucune donnee</div></div></div>
+    </div>
+  </div>
+  <div id="tf-objectifs" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="objectif">+ Nouvel objectif</button></div>
+    <div id="obj-list"><div class="empty"><div class="empty-icon">&#x1F3AF;</div>Aucun objectif</div></div>
+  </div>
+  <div id="tf-courses" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="new_liste">+ Nouvelle liste</button></div>
+    <div id="listes-container"></div>
+  </div>
+  <div id="tf-ia" style="display:none"><div id="ia-content"></div></div>
+</div>
+
+<div class="page" id="page-basket">
+  <div class="page-title">Basket &#x1F3C0;</div>
+  <div class="page-sub">Planning - Skills - Playbook - Notes coaching</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="planning" data-group="tb">&#x1F4C5; Planning</button>
+    <button class="tab" data-tab="skills" data-group="tb">&#x2B50; Skills</button>
+    <button class="tab" data-tab="playbook" data-group="tb">&#x1F4D6; Playbook</button>
+    <button class="tab" data-tab="notes" data-group="tb">&#x1F4DD; Notes</button>
+  </div>
+  <div id="tb-planning">
+    <div class="add-row">
+      <button class="add-btn" data-modal="seance">+ Seance</button>
+      <button class="add-btn amber" data-modal="exercice_basket">+ Exercice</button>
+    </div>
+    <div class="card mb12"><div class="sec">Planning de la semaine</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px" id="week-planning"></div></div>
+    <div class="card"><div class="sec">Exercices / Seances</div><div id="basket-exercices-list"><div class="empty"><div class="empty-icon">&#x1F3C0;</div>Aucun exercice</div></div></div>
+  </div>
+  <div id="tb-skills" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="skill">+ Skill</button></div>
+    <div class="g2">
+      <div class="card"><div class="sec">Acquises</div><div id="skills-done-list"><div class="empty" style="padding:10px"><div style="font-size:11px">Aucun skill maitrise</div></div></div></div>
+      <div class="card"><div class="sec">A travailler</div><div id="skills-todo-list"><div class="empty" style="padding:10px"><div style="font-size:11px">Ajoute tes skills</div></div></div></div>
+    </div>
+  </div>
+  <div id="tb-playbook" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="play">+ Strategie</button></div>
+    <div id="plays-list"><div class="empty"><div class="empty-icon">&#x1F4D6;</div>Aucune strategie</div></div>
+  </div>
+  <div id="tb-notes" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="note_basket">+ Note</button></div>
+    <div id="basket-notes-list"><div class="empty"><div class="empty-icon">&#x1F4DD;</div>Aucune note</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-routine">
+  <div class="page-title">Routine &#x1F525;</div>
+  <div class="page-sub">Habitudes quotidiennes - Exercices - Streak</div>
+  <div class="add-row">
+    <button class="add-btn" data-modal="habitude">+ Habitude</button>
+    <button class="add-btn amber" data-modal="exercice_routine">+ Exercice</button>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="sec">Habitudes du jour</div><div id="habitudes-list"><div class="empty"><div class="empty-icon">&#x1F525;</div>Aucune habitude</div></div></div>
+    <div class="card"><div class="sec">Exercices physiques</div><div id="exercices-list"><div class="empty"><div class="empty-icon">&#x1F4AA;</div>Aucun exercice</div></div></div>
+  </div>
+</div>
+
+<div class="page" id="page-workspace">
+  <div class="page-title">Workspace &#x1F4BC;</div>
+  <div class="page-sub">Projets - Taches - Notes</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="projets" data-group="tw">&#x1F4C1; Projets</button>
+    <button class="tab" data-tab="kanban" data-group="tw">&#x1F4CB; Kanban</button>
+    <button class="tab" data-tab="notes_ws" data-group="tw">&#x1F4DD; Notes</button>
+  </div>
+  <div id="tw-projets">
+    <div class="add-row"><button class="add-btn" data-modal="projet">+ Projet</button></div>
+    <div class="g3" id="proj-list"><div class="empty" style="grid-column:span 3"><div class="empty-icon">&#x1F4C1;</div>Aucun projet</div></div>
+  </div>
+  <div id="tw-kanban" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="tache">+ Tache</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div><div class="kb-col-title" style="color:var(--text3);background:var(--bg3)">A faire</div><div id="col-todo"></div></div>
+      <div><div class="kb-col-title" style="color:var(--accent2);background:rgba(108,99,255,.1)">En cours</div><div id="col-inprogress"></div></div>
+      <div><div class="kb-col-title" style="color:var(--green);background:rgba(52,211,153,.08)">Termine</div><div id="col-done"></div></div>
+    </div>
+  </div>
+  <div id="tw-notes_ws" style="display:none">
+    <div class="add-row"><button class="add-btn" data-modal="note_ws">+ Note</button></div>
+    <div id="notes-ws-list"><div class="empty"><div class="empty-icon">&#x1F4C4;</div>Aucune note</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-database">
+  <div class="page-title">Database &#x1F5C4;</div>
+  <div class="page-sub">Tables personnalisees</div>
+  <div class="add-row"><button class="add-btn" data-modal="db_table">+ Nouvelle table</button></div>
+  <div id="db-tables-list"><div class="empty"><div class="empty-icon">&#x1F5C4;</div>Aucune table</div></div>
+  <div id="db-active-table" style="display:none;margin-top:14px"></div>
+</div>
+</main>
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════
+const PWD_KEY = 'lifeos_auth';
+const CORRECT_PWD = 'lifeos2025';
+
+function checkLogin() {
+  const auth = sessionStorage.getItem(PWD_KEY);
+  if (auth === 'ok') {
+    document.getElementById('login-screen').style.display = 'none';
+  }
+}
+function logout() {
+  sessionStorage.removeItem(PWD_KEY);
+  location.reload();
+}
+
+// ═══════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════
+const S = {
+  get(k) { try { return JSON.parse(localStorage.getItem('lifeos_' + k)) || null; } catch { return null; } },
+  set(k, v) { localStorage.setItem('lifeos_' + k, JSON.stringify(v)); },
+  getArr(k) { return S.get(k) || []; },
+  push(k, v) { const a = S.getArr(k); a.push(v); S.set(k, a); },
+  setArr(k, v) { S.set(k, v); }
+};
+
+// ═══════════════════════════════════
+//  NAV
+// ═══════════════════════════════════
+function nav(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  renderPage(id);
+}
+
+function switchTab(id, group) {
+  document.querySelectorAll('[id^="' + group + '-"]').forEach(el => el.style.display = 'none');
+  document.getElementById(group + '-' + id).style.display = 'block';
+  if (group === 'tf') {
+    if (id === 'transactions') renderFinance();
+    else if (id === 'objectifs') renderObjectifs();
+    else if (id === 'courses') renderCourses();
+    else if (id === 'ia') renderAnalyse();
+  }
+  if (group === 'tb') renderBasket();
+  if (group === 'tw') renderWorkspace();
+}
+
+// ═══════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════
+function fmt(n) { return parseInt(n || 0).toLocaleString('fr-FR') + ' Ar'; }
+function fmtShort(n) {
+  n = parseInt(n || 0);
+  if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'Md Ar';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M Ar';
+  if (n >= 1000) return (n / 1000).toFixed(0) + 'K Ar';
+  return n + ' Ar';
+}
+function todayStr() {
+  const d = new Date();
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function pct(a, b) { return Math.min(100, Math.round((parseInt(a) || 0) / (parseInt(b) || 1) * 100)); }
+function catColor(cat) {
+  const m = { Voiture: 'var(--amber)', Moto: 'var(--coral)', Console: 'var(--accent2)', Terrain: 'var(--green)', Maison: 'var(--accent3)', Sante: 'var(--pink)', Sport: 'var(--green)', Autre: 'var(--text2)' };
+  return m[cat] || 'var(--amber)';
+}
+
+// ═══════════════════════════════════
+//  CHART
+// ═══════════════════════════════════
+let chart = null;
+function buildChart(p) {
+  const txs = S.getArr('transactions');
+  const now = new Date();
+  let labels = [], epargne = [], revenus = [];
+  const count = p === '3a' ? 12 : p === '1a' ? 12 : 6;
+  const step = p === '3a' ? 3 : 1;
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - (i * step), 1);
+    labels.push(d.toLocaleDateString('fr-FR', { month: 'short', year: p === '3a' ? '2-digit' : undefined }));
+    const mTx = txs.filter(t => { const td = new Date(t.date); return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); });
+    const rev = mTx.filter(t => t.type === 'revenu').reduce((s, t) => s + parseInt(t.amount), 0);
+    const dep = mTx.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+    revenus.push(rev); epargne.push(rev - dep);
+  }
+  const cumul = []; let run = 0;
+  epargne.forEach(v => { run += v; cumul.push(run); });
+  const avg = cumul.length > 1 ? (cumul[cumul.length - 1] - cumul[0]) / (cumul.length - 1) : 0;
+  const last = cumul[cumul.length - 1] || 0;
+  const pLabels = [...labels, 'Proj.+1', 'Proj.+2'];
+  const pCumul = [...cumul, null, null];
+  const pProj = [...cumul.map((_, i) => i < cumul.length - 1 ? null : last), last + avg, last + avg * 2];
+  const ctx = document.getElementById('gc'); if (!ctx) return;
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: pLabels,
+      datasets: [
+        { label: 'Epargne cumulee', data: pCumul, borderColor: '#6c63ff', backgroundColor: c => { const g = c.chart.ctx.createLinearGradient(0, 0, 0, c.chart.height); g.addColorStop(0, 'rgba(108,99,255,.28)'); g.addColorStop(1, 'rgba(108,99,255,.01)'); return g; }, borderWidth: 2, fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: '#6c63ff', spanGaps: false, segment: { borderDash: ctx => ctx.p0DataIndex >= cumul.length - 1 ? [5, 4] : [] } },
+        { label: 'Projection', data: pProj, borderColor: '#a78bfa', backgroundColor: 'transparent', borderWidth: 1.5, fill: false, tension: .4, borderDash: [5, 4], pointRadius: 3, pointBackgroundColor: '#a78bfa', spanGaps: false },
+        { label: 'Revenus', data: [...revenus, null, null], borderColor: 'rgba(52,211,153,.55)', backgroundColor: 'transparent', borderWidth: 1, fill: false, tension: .35, borderDash: [2, 3], pointRadius: 2, pointBackgroundColor: '#34d399', spanGaps: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#5a5a72', font: { size: 9 }, boxWidth: 8, padding: 8, usePointStyle: true } },
+        tooltip: { backgroundColor: '#1a1a24', borderColor: '#353545', borderWidth: 1, titleColor: '#f0f0f8', bodyColor: '#9090a8', titleFont: { size: 10 }, bodyFont: { size: 10 }, callbacks: { label: c => { if (c.parsed.y === null) return null; return ' ' + c.dataset.label + ' : ' + c.parsed.y.toLocaleString('fr-FR') + ' Ar'; } } }
+      },
+      scales: {
+        x: { ticks: { color: '#5a5a72', font: { size: 8 }, maxRotation: 0 }, grid: { color: 'rgba(255,255,255,.025)' } },
+        y: { ticks: { color: '#5a5a72', font: { size: 8 }, callback: v => fmtShort(v).replace(' Ar', '') }, grid: { color: 'rgba(255,255,255,.03)' } }
+      }
+    }
+  });
+  document.getElementById('vs').textContent = '0 Ar';
+  document.getElementById('vn').textContent = fmtShort(last);
+  document.getElementById('vp').textContent = fmtShort(Math.max(0, last + avg * 6));
+}
+
+// ═══════════════════════════════════
+//  RENDER ROUTER
+// ═══════════════════════════════════
+function renderPage(id) {
+  if (id === 'dashboard') renderDashboard();
+  else if (id === 'finance') renderFinance();
+  else if (id === 'basket') renderBasket();
+  else if (id === 'routine') renderRoutine();
+  else if (id === 'workspace') renderWorkspace();
+  else if (id === 'database') renderDatabase();
+}
+
+// ═══════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════
+function renderDashboard() {
+  document.getElementById('dash-date').textContent = todayStr() + ' - Resume du jour';
+  const txs = S.getArr('transactions');
+  const totalRev = txs.filter(t => t.type === 'revenu').reduce((s, t) => s + parseInt(t.amount), 0);
+  const totalDep = txs.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+  document.getElementById('d-epargne').textContent = fmtShort(totalRev - totalDep);
+  const objs = S.getArr('objectifs');
+  document.getElementById('d-obj').textContent = objs.length;
+  document.getElementById('d-obj-sub').textContent = objs.filter(o => pct(o.actuel, o.cible) >= 50).length + ' en bonne voie';
+  const seances = S.getArr('seances');
+  const todayDay = new Date().toLocaleDateString('fr-FR', { weekday: 'long' });
+  const ts = seances.find(s => s.jour.toLowerCase() === todayDay.toLowerCase());
+  document.getElementById('d-basket').textContent = ts ? 'Auj.' : '--';
+  document.getElementById('d-basket-sub').textContent = ts ? ts.type : 'Aucune prevue';
+  document.getElementById('badge-basket').textContent = seances.length;
+  const habs = S.getArr('habitudes');
+  document.getElementById('d-routine').textContent = habs.filter(h => h.doneToday).length + '/' + habs.length;
+  const skills = S.getArr('skills');
+  const sd = document.getElementById('d-skills-list');
+  sd.innerHTML = skills.length === 0 ? '<div class="empty" style="padding:8px"><div style="font-size:11px">Aucun skill</div></div>' : skills.slice(0, 4).map(sk => '<div class="skill-row"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--text2)">' + sk.nom + '</span><span>' + sk.pct + '%</span></div><div class="pt"><div class="pf" style="width:' + sk.pct + '%;background:var(--accent)"></div></div></div>').join('');
+  const taches = S.getArr('taches');
+  const urgent = taches.filter(t => t.prio === 'Urgent' && t.statut !== 'Termine');
+  document.getElementById('d-tasks-list').innerHTML = urgent.length === 0 ? '<div class="empty" style="padding:8px"><div style="font-size:11px">Aucune tache urgente</div></div>' : urgent.slice(0, 3).map(t => '<div class="ri"><div class="dot" style="background:var(--coral)"></div><span style="flex:1">' + t.nom + '</span><span class="tag tc">Urgent</span></div>').join('');
+  const dof = document.getElementById('d-obj-fin');
+  dof.innerHTML = objs.length === 0 ? '<div style="color:var(--text3);font-size:11px;grid-column:span 3;text-align:center;padding:8px">Aucun objectif</div>' : objs.slice(0, 3).map(o => { const p2 = pct(o.actuel, o.cible); return '<div><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--text2)">' + o.nom + '</span><span style="color:' + catColor(o.cat) + '">' + p2 + '%</span></div><div class="pt"><div class="pf" style="width:' + p2 + '%;background:' + catColor(o.cat) + '"></div></div></div>'; }).join('');
+  setTimeout(() => buildChart('6m'), 50);
+}
+
+// ═══════════════════════════════════
+//  FINANCE - TRANSACTIONS
+// ═══════════════════════════════════
+function renderFinance() {
+  const txs = S.getArr('transactions');
+  const now = new Date();
+  const m = txs.filter(t => { const d = new Date(t.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  const rev = m.filter(t => t.type === 'revenu').reduce((s, t) => s + parseInt(t.amount), 0);
+  const dep = m.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+  document.getElementById('fin-rev').textContent = fmt(rev);
+  document.getElementById('fin-dep').textContent = fmt(dep);
+  document.getElementById('fin-net').textContent = fmt(rev - dep);
+  const txEl = document.getElementById('tx-list');
+  txEl.innerHTML = txs.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4B8;</div>Aucune transaction</div>' : [...txs].reverse().map((t, ri) => {
+    const i = txs.length - 1 - ri;
+    return '<div class="ri"><div class="dot" style="background:' + (t.type === 'revenu' ? 'var(--green)' : 'var(--coral)') + '"></div><span style="flex:1">' + t.desc + '</span><span style="font-size:10px;color:var(--text3);margin-right:6px">' + t.cat + '</span><span style="color:' + (t.type === 'revenu' ? 'var(--green)' : 'var(--coral)') + ';font-weight:500;margin-right:6px">' + (t.type === 'revenu' ? '+' : '-') + fmt(t.amount) + '</span><button class="ibtn edit" onclick="editTx(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delTx(' + i + ')">&#x2715;</button></div>';
+  }).join('');
+  const cats = {}; txs.filter(t => t.type === 'depense').forEach(t => { cats[t.cat] = (cats[t.cat] || 0) + parseInt(t.amount); });
+  const catEl = document.getElementById('cat-list');
+  const ce = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  catEl.innerHTML = ce.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4CA;</div>Aucune depense</div>' : ce.map(([cat, val]) => { const total = ce.reduce((s, c) => s + c[1], 0); const p2 = Math.round(val / total * 100); return '<div class="ri"><div class="dot" style="background:var(--accent2)"></div><span style="flex:1">' + cat + '</span><span style="margin-right:6px">' + fmt(val) + '</span><span class="tag tp">' + p2 + '%</span></div>'; }).join('');
+}
+function delTx(i) { if (!confirm('Supprimer cette transaction ?')) return; const a = S.getArr('transactions'); a.splice(i, 1); S.setArr('transactions', a); renderFinance(); renderDashboard(); }
+function editTx(i) {
+  const a = S.getArr('transactions'); const t = a[i];
+  currentModal = 'edit_tx'; currentModalExtra = i;
+  document.getElementById('m-title').textContent = 'Modifier la transaction';
+  document.getElementById('m-ok-btn').textContent = 'Enregistrer';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Type</label><select id="mf-type"><option' + (t.type === 'revenu' ? ' selected' : '') + '>revenu</option><option' + (t.type === 'depense' ? ' selected' : '') + '>depense</option></select></div><div class="field"><label>Description</label><input id="mf-desc" type="text" value="' + t.desc + '"></div><div class="field"><label>Montant (Ar)</label><input id="mf-amount" type="number" value="' + t.amount + '"></div><div class="field"><label>Categorie</label><input id="mf-cat" type="text" value="' + t.cat + '"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+
+// ═══════════════════════════════════
+//  FINANCE - OBJECTIFS
+// ═══════════════════════════════════
+function renderObjectifs() {
+  const objs = S.getArr('objectifs');
+  const el = document.getElementById('obj-list');
+  if (objs.length === 0) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#x1F3AF;</div>Aucun objectif</div>'; return; }
+  el.innerHTML = objs.map((o, i) => {
+    const p2 = pct(o.actuel, o.cible);
+    const clr = p2 >= 75 ? 'var(--green)' : p2 >= 40 ? 'var(--amber)' : 'var(--coral)';
+    return '<div class="obj-item"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:13px;font-weight:600;font-family:\'Syne\',sans-serif;flex:1">' + o.nom + '</span><span class="tag ta">' + o.cat + '</span><span style="font-size:12px;color:' + clr + ';font-weight:600">' + p2 + '%</span><button class="ibtn edit" onclick="editObj(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delObj(' + i + ')">&#x2715;</button></div><div class="pt" style="height:6px"><div class="pf" style="width:' + p2 + '%;background:' + clr + '"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:6px"><span>Epargne : ' + fmt(o.actuel) + '</span><span>Cible : ' + fmt(o.cible) + '</span><span>Reste : ' + fmt(Math.max(0, parseInt(o.cible) - parseInt(o.actuel))) + '</span></div>' + (o.note ? '<div style="font-size:10px;color:var(--text2);margin-top:5px;font-style:italic">' + o.note + '</div>' : '') + '<div style="margin-top:8px;display:flex;gap:6px;align-items:center"><button class="add-btn green" style="padding:4px 10px;font-size:10px" onclick="addEpargne(' + i + ')">+ Ajouter epargne</button>' + ((o.historique || []).length > 0 ? '<span style="font-size:10px;color:var(--text3)">Dernier : ' + fmt((o.historique || []).slice(-1)[0].montant) + '</span>' : '') + '</div></div>';
+  }).join('');
+}
+function delObj(i) { if (!confirm('Supprimer ?')) return; const a = S.getArr('objectifs'); a.splice(i, 1); S.setArr('objectifs', a); renderObjectifs(); renderDashboard(); }
+function editObj(i) {
+  const a = S.getArr('objectifs'); const o = a[i];
+  currentModal = 'edit_obj'; currentModalExtra = i;
+  document.getElementById('m-title').textContent = "Modifier l'objectif";
+  document.getElementById('m-ok-btn').textContent = 'Enregistrer';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Nom</label><input id="mf-nom" type="text" value="' + o.nom + '"></div><div class="field"><label>Categorie</label><select id="mf-cat">' + ['Voiture', 'Moto', 'Console', 'Terrain', 'Maison', 'Sante', 'Sport', 'Autre'].map(c => '<option' + (c === o.cat ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></div><div class="field"><label>Epargne actuelle (Ar)</label><input id="mf-actuel" type="number" value="' + o.actuel + '"></div><div class="field"><label>Montant cible (Ar)</label><input id="mf-cible" type="number" value="' + o.cible + '"></div><div class="field"><label>Note</label><input id="mf-note" type="text" value="' + (o.note || '') + '"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+function addEpargne(i) {
+  currentModal = 'add_epargne'; currentModalExtra = i;
+  document.getElementById('m-title').textContent = "Ajouter un versement";
+  document.getElementById('m-ok-btn').textContent = 'Ajouter';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Montant (Ar)</label><input id="mf-montant" type="number" placeholder="Ex: 200000"></div><div class="field"><label>Note (optionnel)</label><input id="mf-note" type="text" placeholder="Ex: Salaire juin"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+
+// ═══════════════════════════════════
+//  FINANCE - COURSES
+// ═══════════════════════════════════
+function renderCourses() {
+  const listes = S.getArr('listes_courses');
+  const el = document.getElementById('listes-container');
+  if (listes.length === 0) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#x1F6D2;</div>Aucune liste -- cree ta premiere !</div>'; return; }
+  el.innerHTML = listes.map((lst, li) => {
+    const items = lst.items || [];
+    const done = items.filter(it => it.done).length;
+    const total = items.reduce((s, it) => s + parseInt(it.montant || 0), 0);
+    return '<div class="card mb12"><div class="lc-header"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:16px">' + (lst.emoji || '&#x1F4CB;') + '</span><span style="font-size:13px;font-weight:600;font-family:\'Syne\',sans-serif">' + lst.nom + '</span>' + (items.length > 0 ? '<span style="font-size:10px;color:var(--text3);margin-left:4px">' + done + '/' + items.length + '</span>' : '') + (total > 0 ? '<span style="font-size:10px;color:var(--amber);margin-left:4px">' + fmtShort(total) + '</span>' : '') + '</div><div style="display:flex;gap:4px"><button class="add-btn" style="padding:4px 10px;font-size:10px" onclick="openAddItem(' + li + ')">+ Article</button><button class="ibtn edit" onclick="editListe(' + li + ')">&#x270F;</button><button class="ibtn del" onclick="delListe(' + li + ')">&#x2715;</button></div></div>' + (items.length === 0 ? '<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Liste vide</div>' : items.map((it, ii) => '<div class="lc-item"><div class="hc' + (it.done ? ' done' : '') + '" onclick="toggleListeItem(' + li + ',' + ii + ')" style="cursor:pointer;flex-shrink:0">' + (it.done ? '&#x2713;' : '') + '</div><span class="lc-item-name" style="' + (it.done ? 'text-decoration:line-through;color:var(--text3)' : '') + '">' + it.nom + '</span>' + (it.montant ? '<span class="lc-item-amount">' + fmt(it.montant) + '</span>' : '') + '<button class="ibtn edit" onclick="editListeItem(' + li + ',' + ii + ')">&#x270F;</button><button class="ibtn del" onclick="delListeItem(' + li + ',' + ii + ')">&#x2715;</button></div>').join('')) + '</div>';
+  }).join('');
+}
+function toggleListeItem(li, ii) { const l = S.getArr('listes_courses'); l[li].items[ii].done = !l[li].items[ii].done; S.setArr('listes_courses', l); renderCourses(); }
+function delListe(li) { if (!confirm('Supprimer cette liste ?')) return; const l = S.getArr('listes_courses'); l.splice(li, 1); S.setArr('listes_courses', l); renderCourses(); }
+function delListeItem(li, ii) { const l = S.getArr('listes_courses'); l[li].items.splice(ii, 1); S.setArr('listes_courses', l); renderCourses(); }
+function editListe(li) {
+  const l = S.getArr('listes_courses'); const lst = l[li];
+  currentModal = 'edit_liste'; currentModalExtra = li;
+  document.getElementById('m-title').textContent = 'Modifier la liste';
+  document.getElementById('m-ok-btn').textContent = 'Enregistrer';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Emoji</label><input id="mf-emoji" type="text" value="' + (lst.emoji || '') + '" maxlength="4" placeholder="Ex: &#x1F6D2;"></div><div class="field"><label>Nom de la liste</label><input id="mf-nom" type="text" value="' + lst.nom + '"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+function openAddItem(li) {
+  currentModal = 'add_liste_item'; currentModalExtra = li;
+  document.getElementById('m-title').textContent = 'Ajouter un article';
+  document.getElementById('m-ok-btn').textContent = 'Ajouter';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Article</label><input id="mf-nom" type="text" placeholder="Ex: Vary mena x2"></div><div class="field"><label>Montant (Ar) -- optionnel</label><input id="mf-montant" type="number" placeholder="Ex: 5000"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+function editListeItem(li, ii) {
+  const l = S.getArr('listes_courses'); const it = l[li].items[ii];
+  currentModal = 'edit_liste_item'; currentModalExtra = { li, ii };
+  document.getElementById('m-title').textContent = "Modifier l'article";
+  document.getElementById('m-ok-btn').textContent = 'Enregistrer';
+  document.getElementById('m-body').innerHTML = '<div class="field"><label>Article</label><input id="mf-nom" type="text" value="' + it.nom + '"></div><div class="field"><label>Montant (Ar)</label><input id="mf-montant" type="number" value="' + (it.montant || '') + '"></div>';
+  document.getElementById('modal').classList.add('open');
+}
+
+// ═══════════════════════════════════
+//  ANALYSE ALGORITHMIQUE (remplace IA)
+// ═══════════════════════════════════
+function renderAnalyse() {
+  const txs = S.getArr('transactions');
+  const objs = S.getArr('objectifs');
+  const listes = S.getArr('listes_courses');
+  const el = document.getElementById('ia-content');
+  if (txs.length === 0 && objs.length === 0) {
+    el.innerHTML = '<div class="conseil"><div class="conseil-icon">&#x1F4CA;</div><div class="conseil-title">Ajoute tes donnees pour une analyse</div><div class="conseil-text">Entre tes revenus, depenses et objectifs dans les onglets precedents.</div></div>';
+    return;
+  }
+  const totalRev = txs.filter(t => t.type === 'revenu').reduce((s, t) => s + parseInt(t.amount), 0);
+  const totalDep = txs.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+  const epargne = totalRev - totalDep;
+  const tauxEp = totalRev > 0 ? Math.round(epargne / totalRev * 100) : 0;
+  const months = new Set(); txs.forEach(t => { const d = new Date(t.date); months.add(d.getFullYear() + '-' + d.getMonth()); });
+  const nbMois = months.size || 1;
+  const epMois = Math.round(epargne / nbMois);
+  const revMois = Math.round(totalRev / nbMois);
+  const depMois = Math.round(totalDep / nbMois);
+  const cats = {}; txs.filter(t => t.type === 'depense').forEach(t => { cats[t.cat] = (cats[t.cat] || 0) + parseInt(t.amount); });
+  const catsSorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+  // ── Score de sante financiere (algorithme 0-100)
+  // Criteres : taux epargne (40pts), regularite (20pts), diversification depenses (20pts), progression objectifs (20pts)
+  let score = 0;
+  // 1. Taux d'epargne
+  score += Math.min(40, Math.round(tauxEp * 2));
+  // 2. Regularite des revenus (nb de mois avec revenu / nb mois total)
+  const moisAvecRevenu = new Set(txs.filter(t => t.type === 'revenu').map(t => { const d = new Date(t.date); return d.getFullYear() + '-' + d.getMonth(); })).size;
+  const regularite = nbMois > 0 ? Math.round(moisAvecRevenu / nbMois * 20) : 0;
+  score += regularite;
+  // 3. Diversification depenses (moins concentre = mieux)
+  const topCatPct = catsSorted.length > 0 ? catsSorted[0][1] / totalDep : 1;
+  score += Math.round((1 - topCatPct) * 20);
+  // 4. Progression objectifs
+  const avgObjPct = objs.length > 0 ? objs.reduce((s, o) => s + pct(o.actuel, o.cible), 0) / objs.length : 0;
+  score += Math.round(avgObjPct / 5);
+  score = Math.min(100, Math.max(0, score));
+  const scoreLabel = score >= 80 ? 'Excellent' : score >= 60 ? 'Bon' : score >= 40 ? 'Moyen' : score >= 20 ? 'Faible' : 'Critique';
+  const scoreColor = score >= 70 ? 'var(--green)' : score >= 45 ? 'var(--amber)' : 'var(--coral)';
+
+  // ── Priorite objectifs (algorithme : ROI temps = epargne_restante / epargne_mois)
+  const objsSorted = [...objs].sort((a, b) => {
+    const roiA = parseInt(a.cible) - parseInt(a.actuel);
+    const roiB = parseInt(b.cible) - parseInt(b.actuel);
+    return roiA - roiB;
+  });
+  const next = objsSorted.find(o => pct(o.actuel, o.cible) < 100);
+
+  // ── Analyse tendance depenses
+  const now = new Date();
+  const lastM = txs.filter(t => { const d = new Date(t.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  const prevM = txs.filter(t => { const d = new Date(t.date); const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.getMonth() === prev.getMonth() && d.getFullYear() === prev.getFullYear(); });
+  const depLast = lastM.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+  const depPrev = prevM.filter(t => t.type === 'depense').reduce((s, t) => s + parseInt(t.amount), 0);
+  const tendancePct = depPrev > 0 ? Math.round((depLast - depPrev) / depPrev * 100) : null;
+
+  // ── Budget courses vs epargne
+  const totalCourses = listes.reduce((s, l) => (l.items || []).reduce((ss, it) => ss + parseInt(it.montant || 0), s), 0);
+  const coursesPct = epMois > 0 ? Math.round(totalCourses / epMois * 100) : 0;
+
+  let html = '<div class="ia-section"><div class="ia-section-title">&#x1F4CA; Score de sante financiere</div>';
+  html += '<div class="ia-score"><div class="ia-score-num" style="color:' + scoreColor + '">' + score + '</div><div class="ia-score-label"><strong style="color:' + scoreColor + '">' + scoreLabel + '</strong><br>Score calcule sur 100<br><span style="font-size:10px;color:var(--text3)">Epargne ' + tauxEp + '% - Regularite ' + regularite + '/20 - Diversification ' + Math.round((1 - topCatPct) * 20) + '/20 - Objectifs ' + Math.round(avgObjPct / 5) + '/20</span></div></div>';
+  html += '<div class="g3"><div class="csm"><div class="sl">Revenu moy./mois</div><div class="sv" style="font-size:15px;color:var(--green)">' + fmtShort(revMois) + '</div></div><div class="csm"><div class="sl">Depense moy./mois</div><div class="sv" style="font-size:15px;color:var(--coral)">' + fmtShort(depMois) + '</div></div><div class="csm"><div class="sl">Epargne moy./mois</div><div class="sv" style="font-size:15px;color:var(--amber)">' + fmtShort(epMois) + '</div></div></div></div>';
+
+  html += '<div class="ia-section"><div class="ia-section-title">&#x1F3AF; Ordre de priorite des objectifs</div>';
+  html += '<div style="font-size:10px;color:var(--text3);margin-bottom:10px">Trie par montant restant croissant (les plus proches d\'abord)</div>';
+  if (objsSorted.length === 0) {
+    html += '<div class="conseil"><div class="conseil-text">Aucun objectif. Ajoute-les dans l\'onglet Objectifs.</div></div>';
+  } else {
+    objsSorted.forEach((o, i) => {
+      const p2 = pct(o.actuel, o.cible);
+      const reste = parseInt(o.cible) - parseInt(o.actuel);
+      const moisRestants = epMois > 0 ? Math.ceil(reste / epMois) : null;
+      const dateEst = moisRestants ? new Date(now.getFullYear(), now.getMonth() + moisRestants, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : null;
+      const type = i === 0 ? 'good' : i === 1 ? 'amber' : '';
+      html += '<div class="conseil ' + type + '"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:18px;font-weight:700;color:var(--text3)">#' + (i + 1) + '</span><span class="conseil-title" style="margin-bottom:0">' + o.nom + '</span><span style="margin-left:auto;font-size:11px;color:var(--text2)">' + p2 + '% atteint</span></div><div class="pt" style="height:4px;margin-bottom:8px"><div class="pf" style="width:' + p2 + '%;background:' + catColor(o.cat) + '"></div></div><div class="conseil-text">Reste <strong>' + fmtShort(reste) + '</strong> a epargner.' + (moisRestants ? ' Estimation : <strong>' + moisRestants + ' mois</strong>' + (dateEst ? ' (vers ' + dateEst + ')' : '') + '.' : ' Augmente ton epargne pour estimer.') + '</div></div>';
+    });
+  }
+  html += '</div>';
+
+  html += '<div class="ia-section"><div class="ia-section-title">&#x1F4A1; Alertes & recommandations</div>';
+  // Alerte taux epargne
+  if (tauxEp < 10) html += '<div class="conseil warn"><div class="conseil-icon">&#x26A0;</div><div class="conseil-title">Taux d\'epargne critique (' + tauxEp + '%)</div><div class="conseil-text">Tu epargnes moins de 10% de tes revenus. Reduire les depenses de 10% libererait <strong>' + fmtShort(depMois * 0.1) + '/mois</strong> supplementaires.</div></div>';
+  else if (tauxEp >= 20) html += '<div class="conseil good"><div class="conseil-icon">&#x2705;</div><div class="conseil-title">Bon taux d\'epargne (' + tauxEp + '%)</div><div class="conseil-text">Tu depasses le seuil recommande de 20%. Oriente ce surplus vers <strong>' + (next ? next.nom : 'ton prochain objectif') + '</strong>.</div></div>';
+  else html += '<div class="conseil amber"><div class="conseil-icon">&#x1F4C8;</div><div class="conseil-title">Taux d\'epargne a ameliorer (' + tauxEp + '%)</div><div class="conseil-text">+5% d\'epargne = <strong>' + fmtShort(revMois * 0.05) + '/mois</strong> supplementaires vers tes objectifs.</div></div>';
+  // Poste de depense principal
+  if (catsSorted.length > 0) {
+    const topCat = catsSorted[0];
+    const topPct = Math.round(topCat[1] / totalDep * 100);
+    html += '<div class="conseil"><div class="conseil-icon">&#x1F4CA;</div><div class="conseil-title">Poste principal : ' + topCat[0] + ' (' + topPct + '%)</div><div class="conseil-text"><strong>' + fmt(topCat[1]) + '</strong> depenses en ' + topCat[0] + '. ' + (topPct > 40 ? 'Concentration elevee -- analyse si ce poste peut etre optimise.' : 'Repartition acceptable.') + '</div></div>';
+  }
+  // Tendance mois courant
+  if (tendancePct !== null) {
+    html += '<div class="conseil ' + (tendancePct > 10 ? 'warn' : tendancePct < -10 ? 'good' : '') + '"><div class="conseil-icon">' + (tendancePct > 0 ? '&#x1F4C8;' : '&#x1F4C9;') + '</div><div class="conseil-title">Tendance depenses ce mois : ' + (tendancePct > 0 ? '+' : '') + tendancePct + '%</div><div class="conseil-text">' + (tendancePct > 10 ? 'Hausse notable vs le mois dernier. Identifie les postes responsables.' : tendancePct < -10 ? 'Bonne maitrise -- depenses en baisse. Continue !' : 'Depenses stables vs le mois precedent.') + '</div></div>';
+  }
+  // Budget courses
+  if (totalCourses > 0) {
+    html += '<div class="conseil"><div class="conseil-icon">&#x1F6D2;</div><div class="conseil-title">Budget listes en cours : ' + fmt(totalCourses) + '</div><div class="conseil-text">Tes listes representent <strong>' + fmtShort(totalCourses) + '</strong>' + (epMois > 0 ? ', soit <strong>' + coursesPct + '%</strong> de ton epargne mensuelle.' : '.') + (coursesPct > 50 ? ' C\'est eleve -- verifie si tout est prioritaire.' : '') + '</div></div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════
+//  BASKET
+// ═══════════════════════════════════
+function renderBasket() {
+  const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const fullDays = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+  const seances = S.getArr('seances');
+  document.getElementById('badge-basket').textContent = seances.length;
+  document.getElementById('week-planning').innerHTML = days.map((d, i) => {
+    const s = seances.find(se => se.jour.toLowerCase() === fullDays[i]);
+    return '<div class="day-cell"><div class="day-lbl">' + d + '</div>' + (s ? '<div class="session-pill ' + (s.type === 'Match' ? 'sp-green' : 'sp-blue') + '">' + s.type + '</div><button class="ibtn del" onclick="delItem(\'seances\',' + seances.indexOf(s) + ')" style="font-size:9px;margin-top:2px">&#x2715;</button>' : '<div class="session-pill sp-rest">Repos</div>') + '</div>';
+  }).join('');
+  const exs = S.getArr('exercices_basket');
+  document.getElementById('basket-exercices-list').innerHTML = exs.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F3C0;</div>Aucun exercice</div>' : exs.map((e, i) => '<div class="ri"><div class="dot" style="background:var(--accent)"></div><span style="flex:1">' + e.nom + '</span><span style="font-size:11px;color:var(--text2);margin-right:8px">' + (e.reps || '') + '</span><button class="ibtn edit" onclick="editExerciceBasket(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'exercices_basket\',' + i + ')">&#x2715;</button></div>').join('');
+  const skills = S.getArr('skills');
+  const done = skills.filter(s => s.statut === 'Maitrise');
+  const todo = skills.filter(s => s.statut !== 'Maitrise');
+  document.getElementById('skills-done-list').innerHTML = done.length === 0 ? '<div class="empty" style="padding:8px"><div style="font-size:11px">Aucun skill maitrise</div></div>' : done.map((s, i) => '<div class="ri"><div class="dot" style="background:var(--green)"></div><span style="flex:1">' + s.nom + '</span><span class="tag tg">' + s.statut + '</span><button class="ibtn edit" onclick="editSkill(' + skills.indexOf(s) + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'skills\',' + skills.indexOf(s) + ')">&#x2715;</button></div>').join('');
+  document.getElementById('skills-todo-list').innerHTML = todo.length === 0 ? '<div class="empty" style="padding:8px"><div style="font-size:11px">Ajoute tes skills</div></div>' : todo.map((s, i) => '<div class="skill-row"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--text2)">' + s.nom + '</span><div style="display:flex;gap:4px;align-items:center"><span>' + s.pct + '%</span><button class="ibtn edit" onclick="editSkill(' + skills.indexOf(s) + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'skills\',' + skills.indexOf(s) + ')">&#x2715;</button></div></div><div class="pt"><div class="pf" style="width:' + s.pct + '%;background:var(--accent)"></div></div></div>').join('');
+  const plays = S.getArr('plays');
+  document.getElementById('plays-list').innerHTML = plays.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4D6;</div>Aucune strategie</div>' : plays.map((p, i) => '<div class="play-card"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="tag tp">' + p.type + '</span><span style="font-size:12px;font-weight:500;flex:1">' + p.nom + '</span><span class="tag ' + ({ 'Maitrise': 'tg', 'En apprentissage': 'ta', 'A apprendre': 'tk' }[p.statut] || 'tk') + '">' + p.statut + '</span><button class="ibtn edit" onclick="editPlay(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'plays\',' + i + ')">&#x2715;</button></div>' + (p.desc ? '<div style="font-size:10px;color:var(--text2)">' + p.desc + '</div>' : '') + '</div>').join('');
+  const notes = S.getArr('notes_basket');
+  document.getElementById('basket-notes-list').innerHTML = notes.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4DD;</div>Aucune note</div>' : [...notes].reverse().map((n, ri) => { const i = notes.length - 1 - ri; return '<div class="card mb12"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div class="sec" style="margin-bottom:0">&#x1F4DD; ' + n.type + ' -- ' + n.date + '</div><div><button class="ibtn edit" onclick="editNoteBasket(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'notes_basket\',' + i + ')">&#x2715;</button></div></div><div style="font-size:11px;color:var(--text2);line-height:1.65">' + n.contenu + '</div></div>'; }).join('');
+}
+function editExerciceBasket(i) { const a = S.getArr('exercices_basket'); const e = a[i]; currentModal = 'edit_exercice_basket'; currentModalExtra = i; document.getElementById('m-title').textContent = "Modifier l'exercice"; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Exercice</label><input id="mf-nom" type="text" value="' + e.nom + '"></div><div class="field"><label>Reps</label><input id="mf-reps" type="text" value="' + (e.reps || '') + '"></div>'; document.getElementById('modal').classList.add('open'); }
+function editSkill(i) { const a = S.getArr('skills'); const s = a[i]; currentModal = 'edit_skill'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier le skill'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Nom</label><input id="mf-nom" type="text" value="' + s.nom + '"></div><div class="field"><label>Niveau (%)</label><input id="mf-pct" type="number" value="' + s.pct + '"></div><div class="field"><label>Statut</label><select id="mf-statut">' + ['A apprendre', 'En progression', 'Avance', 'Maitrise'].map(o => '<option' + (o === s.statut ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>'; document.getElementById('modal').classList.add('open'); }
+function editPlay(i) { const a = S.getArr('plays'); const p = a[i]; currentModal = 'edit_play'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier la strategie'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Nom</label><input id="mf-nom" type="text" value="' + p.nom + '"></div><div class="field"><label>Type</label><select id="mf-type">' + ['Attaque', 'Defense', 'Transition', 'Fautes', 'Remise en jeu'].map(o => '<option' + (o === p.type ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div><div class="field"><label>Description</label><textarea id="mf-desc">' + (p.desc || '') + '</textarea></div><div class="field"><label>Statut</label><select id="mf-statut">' + ['A apprendre', 'En apprentissage', 'Maitrise'].map(o => '<option' + (o === p.statut ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>'; document.getElementById('modal').classList.add('open'); }
+function editNoteBasket(i) { const a = S.getArr('notes_basket'); const n = a[i]; currentModal = 'edit_note_basket'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier la note'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Date</label><input id="mf-date" type="text" value="' + n.date + '"></div><div class="field"><label>Type</label><select id="mf-type">' + ['Entrainement', 'Match', 'Coaching', 'Analyse'].map(o => '<option' + (o === n.type ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div><div class="field"><label>Contenu</label><textarea id="mf-contenu">' + n.contenu + '</textarea></div>'; document.getElementById('modal').classList.add('open'); }
+
+// ═══════════════════════════════════
+//  ROUTINE
+// ═══════════════════════════════════
+function renderRoutine() {
+  const habs = S.getArr('habitudes');
+  document.getElementById('habitudes-list').innerHTML = habs.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F525;</div>Aucune habitude</div>' : habs.map((h, i) => '<div class="hr" onclick="toggleHabit(' + i + ')"><div class="hc' + (h.doneToday ? ' done' : '') + '">' + (h.doneToday ? '&#x2713;' : '') + '</div><span style="font-size:11px' + (h.doneToday ? ';color:var(--text3)' : '') + '">' + h.nom + '</span><span style="font-size:10px;color:' + (h.streak > 0 ? 'var(--amber)' : 'var(--text3)') + ';margin-left:auto">' + (h.streak > 0 ? '&#x1F525;' + h.streak + 'j' : h.moment) + '</span><button class="ibtn edit" onclick="event.stopPropagation();editHabitude(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="event.stopPropagation();delItem(\'habitudes\',' + i + ')">&#x2715;</button></div>').join('');
+  const exs = S.getArr('exercices_routine');
+  const statCls = { 'Fait': 'tg', 'En cours': 'tp', 'A faire': 'tk' };
+  const dotC = { 'Fait': 'var(--green)', 'En cours': 'var(--accent)', 'A faire': 'var(--border2)' };
+  document.getElementById('exercices-list').innerHTML = exs.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4AA;</div>Aucun exercice</div>' : exs.map((e, i) => '<div class="ri"><div class="dot" style="background:' + (dotC[e.statut] || 'var(--border2)') + '"></div><span style="flex:1">' + e.nom + ' -- ' + e.series + '</span><span class="tag ' + (statCls[e.statut] || 'tk') + '">' + e.statut + '</span><button class="ibtn edit" onclick="editExerciceRoutine(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'exercices_routine\',' + i + ')">&#x2715;</button></div>').join('');
+}
+function toggleHabit(i) { const h = S.getArr('habitudes'); h[i].doneToday = !h[i].doneToday; if (h[i].doneToday) h[i].streak = (h[i].streak || 0) + 1; S.setArr('habitudes', h); renderRoutine(); }
+function editHabitude(i) { const a = S.getArr('habitudes'); const h = a[i]; currentModal = 'edit_habitude'; currentModalExtra = i; document.getElementById('m-title').textContent = "Modifier l'habitude"; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Habitude</label><input id="mf-nom" type="text" value="' + h.nom + '"></div><div class="field"><label>Moment</label><select id="mf-moment">' + ['Matin', 'Midi', 'Soir', 'Journee'].map(o => '<option' + (o === h.moment ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>'; document.getElementById('modal').classList.add('open'); }
+function editExerciceRoutine(i) { const a = S.getArr('exercices_routine'); const e = a[i]; currentModal = 'edit_exercice_routine'; currentModalExtra = i; document.getElementById('m-title').textContent = "Modifier l'exercice"; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Exercice</label><input id="mf-nom" type="text" value="' + e.nom + '"></div><div class="field"><label>Series x Reps</label><input id="mf-series" type="text" value="' + e.series + '"></div><div class="field"><label>Statut</label><select id="mf-statut">' + ['A faire', 'En cours', 'Fait'].map(o => '<option' + (o === e.statut ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>'; document.getElementById('modal').classList.add('open'); }
+
+// ═══════════════════════════════════
+//  WORKSPACE
+// ═══════════════════════════════════
+function renderWorkspace() {
+  const projs = S.getArr('projets');
+  const catCls = { Pro: 'tc', Perso: 'ta', Etude: 'tb', Sport: 'tg', Autre: 'tk' };
+  document.getElementById('proj-list').innerHTML = projs.length === 0 ? '<div class="empty" style="grid-column:span 3"><div class="empty-icon">&#x1F4C1;</div>Aucun projet</div>' : projs.map((p, i) => '<div class="proj-card"><div style="margin-bottom:5px;display:flex;justify-content:space-between;align-items:center"><span class="tag ' + (catCls[p.cat] || 'tk') + '">' + p.cat + '</span><div><button class="ibtn edit" onclick="editProjet(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'projets\',' + i + ')">&#x2715;</button></div></div><div style="font-size:13px;font-weight:500;margin-bottom:3px">' + p.nom + '</div><div class="proj-bar"><div style="height:100%;border-radius:2px;background:var(--accent);width:' + p.avancement + '%"></div></div><div style="font-size:10px;color:var(--text3)">' + p.avancement + '% avancement</div></div>').join('');
+  const taches = S.getArr('taches');
+  const prioCls = { Urgent: 'tc', Moyen: 'ta', Normal: 'tp', Faible: 'tk' };
+  ['todo', 'inprogress', 'done'].forEach(col => {
+    const map = { todo: 'A faire', inprogress: 'En cours', done: 'Termine' };
+    const f = taches.filter(t => t.statut === map[col]);
+    document.getElementById('col-' + col).innerHTML = f.length === 0 ? '' : f.map(t => '<div class="kb-card" style="background:var(--bg3);border:1px solid ' + (col === 'done' ? 'rgba(52,211,153,.2)' : col === 'inprogress' ? 'rgba(108,99,255,.25)' : 'var(--border)') + '"><div style="font-size:11px;margin-bottom:5px;color:' + (col === 'done' ? 'var(--text2)' : 'var(--text)') + '">' + t.nom + '</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="tag ' + (prioCls[t.prio] || 'tk') + '">' + t.prio + '</span><div><button class="ibtn edit" onclick="editTache(' + taches.indexOf(t) + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'taches\',' + taches.indexOf(t) + ')">&#x2715;</button></div></div></div>').join('');
+  });
+  const notes = S.getArr('notes_ws');
+  document.getElementById('notes-ws-list').innerHTML = notes.length === 0 ? '<div class="empty"><div class="empty-icon">&#x1F4C4;</div>Aucune note</div>' : [...notes].reverse().map((n, ri) => { const i = notes.length - 1 - ri; return '<div class="card mb12"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div class="sec" style="margin-bottom:0">&#x1F4C4; ' + n.titre + '</div><div><button class="ibtn edit" onclick="editNoteWS(' + i + ')">&#x270F;</button><button class="ibtn del" onclick="delItem(\'notes_ws\',' + i + ')">&#x2715;</button></div></div><div style="font-size:11px;color:var(--text2);line-height:1.65">' + n.contenu + '</div></div>'; }).join('');
+}
+function editProjet(i) { const a = S.getArr('projets'); const p = a[i]; currentModal = 'edit_projet'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier le projet'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Nom</label><input id="mf-nom" type="text" value="' + p.nom + '"></div><div class="field"><label>Categorie</label><select id="mf-cat">' + ['Pro', 'Perso', 'Etude', 'Sport', 'Autre'].map(o => '<option' + (o === p.cat ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div><div class="field"><label>Avancement (%)</label><input id="mf-avancement" type="number" value="' + p.avancement + '"></div>'; document.getElementById('modal').classList.add('open'); }
+function editTache(i) { const a = S.getArr('taches'); const t = a[i]; currentModal = 'edit_tache'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier la tache'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Tache</label><input id="mf-nom" type="text" value="' + t.nom + '"></div><div class="field"><label>Priorite</label><select id="mf-prio">' + ['Urgent', 'Moyen', 'Normal', 'Faible'].map(o => '<option' + (o === t.prio ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div><div class="field"><label>Statut</label><select id="mf-statut">' + ['A faire', 'En cours', 'Termine'].map(o => '<option' + (o === t.statut ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>'; document.getElementById('modal').classList.add('open'); }
+function editNoteWS(i) { const a = S.getArr('notes_ws'); const n = a[i]; currentModal = 'edit_note_ws'; currentModalExtra = i; document.getElementById('m-title').textContent = 'Modifier la note'; document.getElementById('m-ok-btn').textContent = 'Enregistrer'; document.getElementById('m-body').innerHTML = '<div class="field"><label>Titre</label><input id="mf-titre" type="text" value="' + n.titre + '"></div><div class="field"><label>Contenu</label><textarea id="mf-contenu">' + n.contenu + '</textarea></div>'; document.getElementById('modal').classList.add('open'); }
+
+// ═══════════════════════════════════
+//  DATABASE
+// ═══════════════════════════════════
+function renderDatabase() {
+  const tables = S.getArr('db_tables');
+  const el = document.getElementById('db-tables-list');
+  if (tables.length === 0) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#x1F5C4;</div>Aucune table</div>'; return; }
+  el.innerHTML = '<div class="g3 mb12">' + tables.map((t, i) => '<div class="csm" style="cursor:pointer;border-color:rgba(108,99,255,.25)" onclick="showTable(' + i + ')"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="sl">Table</div><button class="ibtn del" onclick="event.stopPropagation();delItem(\'db_tables\',' + i + ')">&#x2715;</button></div><div style="font-size:13px;font-weight:600;font-family:\'Syne\',sans-serif;color:var(--accent2)">' + t.nom + '</div><div style="font-size:10px;color:var(--text3);margin-top:3px">' + (t.rows || []).length + ' entrees</div></div>').join('') + '</div>';
+}
+function showTable(i) {
+  const tables = S.getArr('db_tables'); const t = tables[i];
+  const el = document.getElementById('db-active-table'); el.style.display = 'block';
+  el.innerHTML = '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="sec" style="margin-bottom:0">' + t.nom + '</div><button class="add-btn" onclick="openModal(\'db_entry\',' + i + ')" style="font-size:10px;padding:5px 10px">+ Entree</button></div>' + ((t.rows || []).length === 0 ? '<div class="empty" style="padding:12px"><div style="font-size:11px">Aucune entree</div></div>' : '<div style="overflow-x:auto"><table class="db-table" style="border:1px solid var(--border);border-radius:var(--rs);overflow:hidden"><thead><tr><th>Nom</th><th>Info</th><th>Statut</th><th>Tag</th><th></th></tr></thead><tbody>' + (t.rows || []).map((r, j) => '<tr><td>' + (r.nom || '--') + '</td><td>' + (r.email || '--') + '</td><td><span class="tag ' + (r.statut === 'Actif' ? 'tg' : r.statut === 'Prospect' ? 'ta' : 'tk') + '">' + (r.statut || '--') + '</span></td><td><span class="tag tp">' + (r.tag || '--') + '</span></td><td><button class="ibtn del" onclick="deleteDbRow(' + i + ',' + j + ')">&#x2715;</button></td></tr>').join('') + '</tbody></table></div>') + '</div>';
+}
+function deleteDbRow(ti, ri) { const t = S.getArr('db_tables'); t[ti].rows.splice(ri, 1); S.setArr('db_tables', t); showTable(ti); }
+
+// ═══════════════════════════════════
+//  GENERIC DELETE
+// ═══════════════════════════════════
+function delItem(key, i) {
+  const a = S.getArr(key); a.splice(i, 1); S.setArr(key, a);
+  const active = document.querySelector('.page.active');
+  if (active) renderPage(active.id.replace('page-', ''));
+}
+
+// ═══════════════════════════════════
+//  MODAL SYSTEM
+// ═══════════════════════════════════
+const MODALS = {
+  revenu: { title: 'Ajouter un revenu', fields: [{ id: 'desc', label: 'Description', type: 'text', ph: 'Ex: Salaire' }, { id: 'amount', label: 'Montant (Ar)', type: 'number', ph: 'Ex: 4000000' }, { id: 'cat', label: 'Source', type: 'select', opts: ['Salaire', 'Freelance', 'Vente', 'Prime', 'Autre'] }] },
+  depense: { title: 'Ajouter une depense', fields: [{ id: 'desc', label: 'Description', type: 'text', ph: 'Ex: Epicerie' }, { id: 'amount', label: 'Montant (Ar)', type: 'number', ph: 'Ex: 45000' }, { id: 'cat', label: 'Categorie', type: 'select', opts: ['Alimentation', 'Transport', 'Logement', 'Sport', 'Sante', 'Loisirs', 'Vetements', 'Factures', 'Autre'] }] },
+  objectif: { title: 'Nouvel objectif', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: Moto Honda' }, { id: 'cat', label: 'Categorie', type: 'select', opts: ['Voiture', 'Moto', 'Console', 'Terrain', 'Maison', 'Sante', 'Sport', 'Autre'] }, { id: 'actuel', label: 'Epargne actuelle (Ar)', type: 'number', ph: 'Ex: 500000' }, { id: 'cible', label: 'Montant cible (Ar)', type: 'number', ph: 'Ex: 10000000' }, { id: 'note', label: 'Note (optionnel)', type: 'text', ph: '' }] },
+  new_liste: { title: 'Nouvelle liste', fields: [{ id: 'emoji', label: 'Emoji', type: 'text', ph: 'Ex: &#x1F6D2;' }, { id: 'nom', label: 'Nom de la liste', type: 'text', ph: 'Ex: Courses semaine' }] },
+  seance: { title: 'Planifier une seance', fields: [{ id: 'jour', label: 'Jour', type: 'select', opts: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'] }, { id: 'type', label: 'Type', type: 'select', opts: ['Dribbles', 'Tirs', 'Defense', 'Physique', 'Match', 'Strategie', 'Mixte'] }] },
+  exercice_basket: { title: 'Ajouter un exercice', fields: [{ id: 'nom', label: 'Exercice', type: 'text', ph: 'Ex: Crossover x50' }, { id: 'reps', label: 'Reps', type: 'text', ph: 'Ex: 3x20' }] },
+  skill: { title: 'Ajouter une skill', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: Tir 3pts' }, { id: 'pct', label: 'Niveau (%)', type: 'number', ph: 'Ex: 40' }, { id: 'statut', label: 'Statut', type: 'select', opts: ['A apprendre', 'En progression', 'Avance', 'Maitrise'] }] },
+  play: { title: 'Nouvelle strategie', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: Pick & Roll' }, { id: 'type', label: 'Type', type: 'select', opts: ['Attaque', 'Defense', 'Transition', 'Fautes', 'Remise en jeu'] }, { id: 'desc', label: 'Description', type: 'textarea', ph: 'Decris la strategie...' }, { id: 'statut', label: 'Statut', type: 'select', opts: ['A apprendre', 'En apprentissage', 'Maitrise'] }] },
+  note_basket: { title: 'Nouvelle note', fields: [{ id: 'date', label: 'Date', type: 'text', ph: 'Ex: 1 juin 2025' }, { id: 'type', label: 'Type', type: 'select', opts: ['Entrainement', 'Match', 'Coaching', 'Analyse'] }, { id: 'contenu', label: 'Note', type: 'textarea', ph: 'Tes observations...' }] },
+  habitude: { title: 'Nouvelle habitude', fields: [{ id: 'nom', label: 'Habitude', type: 'text', ph: 'Ex: Lecture 20 min' }, { id: 'moment', label: 'Moment', type: 'select', opts: ['Matin', 'Midi', 'Soir', 'Journee'] }] },
+  exercice_routine: { title: 'Nouvel exercice', fields: [{ id: 'nom', label: 'Exercice', type: 'text', ph: 'Ex: Pompes' }, { id: 'series', label: 'Series x Reps', type: 'text', ph: 'Ex: 4x15' }, { id: 'statut', label: 'Statut', type: 'select', opts: ['A faire', 'En cours', 'Fait'] }] },
+  projet: { title: 'Nouveau projet', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: App mobile' }, { id: 'cat', label: 'Categorie', type: 'select', opts: ['Pro', 'Perso', 'Etude', 'Sport', 'Autre'] }, { id: 'avancement', label: 'Avancement (%)', type: 'number', ph: 'Ex: 0' }] },
+  tache: { title: 'Nouvelle tache', fields: [{ id: 'nom', label: 'Tache', type: 'text', ph: 'Ex: Rediger rapport' }, { id: 'prio', label: 'Priorite', type: 'select', opts: ['Urgent', 'Moyen', 'Normal', 'Faible'] }, { id: 'statut', label: 'Colonne', type: 'select', opts: ['A faire', 'En cours', 'Termine'] }] },
+  note_ws: { title: 'Nouvelle note', fields: [{ id: 'titre', label: 'Titre', type: 'text', ph: 'Ex: Reunion equipe' }, { id: 'contenu', label: 'Contenu', type: 'textarea', ph: 'Tes notes...' }] },
+  db_table: { title: 'Nouvelle table', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: Contacts' }, { id: 'desc', label: 'Description', type: 'text', ph: '' }] },
+  db_entry: { title: 'Nouvelle entree', fields: [{ id: 'nom', label: 'Nom', type: 'text', ph: 'Ex: Jean Rakoto' }, { id: 'email', label: 'Info', type: 'text', ph: 'Ex: jean@mail.mg' }, { id: 'statut', label: 'Statut', type: 'select', opts: ['Actif', 'Prospect', 'Inactif', 'Archive'] }, { id: 'tag', label: 'Tag', type: 'select', opts: ['Pro', 'Perso', 'Equipe', 'Client', 'Partenaire'] }] }
+};
+
+let currentModal = ''; let currentModalExtra = null;
+function openModal(type, extra) {
+  currentModal = type; currentModalExtra = extra;
+  const cfg = MODALS[type]; if (!cfg) return;
+  document.getElementById('m-title').textContent = cfg.title;
+  document.getElementById('m-ok-btn').textContent = 'Ajouter';
+  document.getElementById('m-body').innerHTML = cfg.fields.map(f => '<div class="field"><label>' + f.label + '</label>' + (f.type === 'select' ? '<select id="mf-' + f.id + '">' + f.opts.map(o => '<option>' + o + '</option>').join('') + '</select>' : f.type === 'textarea' ? '<textarea id="mf-' + f.id + '" placeholder="' + (f.ph || '') + '"></textarea>' : '<input id="mf-' + f.id + '" type="' + f.type + '" placeholder="' + (f.ph || '') + '">') + '</div>').join('');
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => { const fi = document.querySelector('#m-body input,#m-body select'); if (fi) fi.focus(); }, 80);
+}
+function gf(id) { const el = document.getElementById('mf-' + id); return el ? el.value.trim() : ''; }
+
+function submitModal() {
+  const m = currentModal; const now = new Date().toISOString();
+  // EDITS
+  if (m === 'edit_tx') { const a = S.getArr('transactions'); a[currentModalExtra] = { ...a[currentModalExtra], type: gf('type'), desc: gf('desc'), amount: gf('amount'), cat: gf('cat') }; S.setArr('transactions', a); renderFinance(); }
+  else if (m === 'edit_obj') { const a = S.getArr('objectifs'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), cat: gf('cat'), actuel: gf('actuel'), cible: gf('cible'), note: gf('note') }; S.setArr('objectifs', a); renderObjectifs(); }
+  else if (m === 'add_epargne') { const a = S.getArr('objectifs'); const i = currentModalExtra; const mt = parseInt(gf('montant')) || 0; if (mt > 0) { a[i].actuel = parseInt(a[i].actuel) + mt; if (!a[i].historique) a[i].historique = []; a[i].historique.push({ montant: mt, note: gf('note'), date: now }); } S.setArr('objectifs', a); renderObjectifs(); }
+  else if (m === 'edit_liste') { const l = S.getArr('listes_courses'); l[currentModalExtra] = { ...l[currentModalExtra], emoji: gf('emoji') || '&#x1F4CB;', nom: gf('nom') }; S.setArr('listes_courses', l); renderCourses(); }
+  else if (m === 'add_liste_item') { const l = S.getArr('listes_courses'); if (!l[currentModalExtra].items) l[currentModalExtra].items = []; l[currentModalExtra].items.push({ nom: gf('nom'), montant: gf('montant') || 0, done: false, date: now }); S.setArr('listes_courses', l); renderCourses(); }
+  else if (m === 'edit_liste_item') { const l = S.getArr('listes_courses'); const { li, ii } = currentModalExtra; l[li].items[ii] = { ...l[li].items[ii], nom: gf('nom'), montant: gf('montant') || 0 }; S.setArr('listes_courses', l); renderCourses(); }
+  else if (m === 'edit_exercice_basket') { const a = S.getArr('exercices_basket'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), reps: gf('reps') }; S.setArr('exercices_basket', a); renderBasket(); }
+  else if (m === 'edit_skill') { const a = S.getArr('skills'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), pct: gf('pct'), statut: gf('statut') }; S.setArr('skills', a); renderBasket(); }
+  else if (m === 'edit_play') { const a = S.getArr('plays'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), type: gf('type'), desc: gf('desc'), statut: gf('statut') }; S.setArr('plays', a); renderBasket(); }
+  else if (m === 'edit_note_basket') { const a = S.getArr('notes_basket'); a[currentModalExtra] = { ...a[currentModalExtra], date: gf('date'), type: gf('type'), contenu: gf('contenu') }; S.setArr('notes_basket', a); renderBasket(); }
+  else if (m === 'edit_habitude') { const a = S.getArr('habitudes'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), moment: gf('moment') }; S.setArr('habitudes', a); renderRoutine(); }
+  else if (m === 'edit_exercice_routine') { const a = S.getArr('exercices_routine'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), series: gf('series'), statut: gf('statut') }; S.setArr('exercices_routine', a); renderRoutine(); }
+  else if (m === 'edit_projet') { const a = S.getArr('projets'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), cat: gf('cat'), avancement: gf('avancement') }; S.setArr('projets', a); renderWorkspace(); }
+  else if (m === 'edit_tache') { const a = S.getArr('taches'); a[currentModalExtra] = { ...a[currentModalExtra], nom: gf('nom'), prio: gf('prio'), statut: gf('statut') }; S.setArr('taches', a); renderWorkspace(); }
+  else if (m === 'edit_note_ws') { const a = S.getArr('notes_ws'); a[currentModalExtra] = { ...a[currentModalExtra], titre: gf('titre'), contenu: gf('contenu') }; S.setArr('notes_ws', a); renderWorkspace(); }
+  // AJOUTS
+  else if (m === 'revenu' || m === 'depense') { const amt = gf('amount'); if (!amt) return; S.push('transactions', { type: m, desc: gf('desc') || m, amount: amt, cat: gf('cat'), date: now }); renderFinance(); }
+  else if (m === 'objectif') { if (!gf('nom')) return; S.push('objectifs', { nom: gf('nom'), cat: gf('cat'), actuel: gf('actuel') || 0, cible: gf('cible') || 1, note: gf('note'), historique: [], date: now }); renderObjectifs(); }
+  else if (m === 'new_liste') { if (!gf('nom')) return; S.push('listes_courses', { emoji: gf('emoji') || '&#x1F4CB;', nom: gf('nom'), items: [], date: now }); renderCourses(); }
+  else if (m === 'seance') { S.push('seances', { jour: gf('jour'), type: gf('type'), date: now }); renderBasket(); }
+  else if (m === 'exercice_basket') { if (!gf('nom')) return; S.push('exercices_basket', { nom: gf('nom'), reps: gf('reps'), date: now }); renderBasket(); }
+  else if (m === 'skill') { if (!gf('nom')) return; S.push('skills', { nom: gf('nom'), pct: gf('pct') || 0, statut: gf('statut'), date: now }); renderBasket(); }
+  else if (m === 'play') { if (!gf('nom')) return; S.push('plays', { nom: gf('nom'), type: gf('type'), desc: gf('desc'), statut: gf('statut'), date: now }); renderBasket(); }
+  else if (m === 'note_basket') { if (!gf('contenu')) return; S.push('notes_basket', { date: gf('date') || new Date().toLocaleDateString('fr-FR'), type: gf('type'), contenu: gf('contenu') }); renderBasket(); }
+  else if (m === 'habitude') { if (!gf('nom')) return; S.push('habitudes', { nom: gf('nom'), moment: gf('moment'), doneToday: false, streak: 0, date: now }); renderRoutine(); }
+  else if (m === 'exercice_routine') { if (!gf('nom')) return; S.push('exercices_routine', { nom: gf('nom'), series: gf('series') || '3x10', statut: gf('statut'), date: now }); renderRoutine(); }
+  else if (m === 'projet') { if (!gf('nom')) return; S.push('projets', { nom: gf('nom'), cat: gf('cat'), avancement: gf('avancement') || 0, date: now }); renderWorkspace(); }
+  else if (m === 'tache') { if (!gf('nom')) return; S.push('taches', { nom: gf('nom'), prio: gf('prio'), statut: gf('statut'), date: now }); renderWorkspace(); }
+  else if (m === 'note_ws') { if (!gf('titre')) return; S.push('notes_ws', { titre: gf('titre'), contenu: gf('contenu'), date: now }); renderWorkspace(); }
+  else if (m === 'db_table') { if (!gf('nom')) return; S.push('db_tables', { nom: gf('nom'), desc: gf('desc'), rows: [], date: now }); renderDatabase(); }
+  else if (m === 'db_entry') { const t = S.getArr('db_tables'); const ti = currentModalExtra; if (ti === null || ti === undefined) return; if (!t[ti].rows) t[ti].rows = []; t[ti].rows.push({ nom: gf('nom'), email: gf('email'), statut: gf('statut'), tag: gf('tag'), date: now }); S.setArr('db_tables', t); showTable(ti); }
+  document.getElementById('modal').classList.remove('open');
+  if (document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+}
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Login
+  checkLogin();
+  document.getElementById('login-btn').addEventListener('click', () => {
+    const pwd = document.getElementById('login-pwd').value;
+    if (pwd === CORRECT_PWD) {
+      sessionStorage.setItem(PWD_KEY, 'ok');
+      document.getElementById('login-screen').style.display = 'none';
+      renderDashboard();
+    } else {
+      document.getElementById('login-error').textContent = 'Mot de passe incorrect';
+      document.getElementById('login-pwd').value = '';
+    }
+  });
+  document.getElementById('login-pwd').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-btn').click(); });
+
+  // Sidebar nav
+  document.querySelectorAll('.ni[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => nav(btn.dataset.nav, btn));
+  });
+  // Tabs
+  document.querySelectorAll('.tab[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group; const id = btn.dataset.tab;
+      document.querySelectorAll('[id^="' + group + '-"]').forEach(el => el.style.display = 'none');
+      document.getElementById(group + '-' + id).style.display = 'block';
+      btn.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      switchTab(id, group);
+    });
+  });
+  // data-modal buttons (delegation)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-modal]');
+    if (btn && !e.target.closest('.modal-bg')) openModal(btn.dataset.modal);
+  });
+  // Modal controls
+  document.getElementById('m-cancel-btn').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
+  document.getElementById('m-ok-btn').addEventListener('click', submitModal);
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); });
+  // Chart period
+  document.getElementById('pb-6m').addEventListener('click', e => { document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); e.target.classList.add('on'); buildChart('6m'); });
+  document.getElementById('pb-1a').addEventListener('click', e => { document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); e.target.classList.add('on'); buildChart('1a'); });
+  document.getElementById('pb-3a').addEventListener('click', e => { document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); e.target.classList.add('on'); buildChart('3a'); });
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('modal').classList.remove('open');
+    if (e.key === 'Enter' && document.getElementById('modal').classList.contains('open') && document.activeElement.tagName !== 'TEXTAREA') submitModal();
+  });
+  // Reset habitudes chaque jour
+  const lastDay = S.get('lastDay'); const todayDate = new Date().toDateString();
+  if (lastDay !== todayDate) { const habs = S.getArr('habitudes'); habs.forEach(h => h.doneToday = false); S.setArr('habitudes', habs); S.set('lastDay', todayDate); }
+  // Render
+  renderDashboard();
+});
+</script>
+</body>
+</html>

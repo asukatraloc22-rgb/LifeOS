@@ -910,4 +910,656 @@ function renderBasket() {
   todoContainer.innerHTML = todoSkills.length === 0 ? '<div class="empty" style="padding:10px;">Liste vide</div>' : todoSkills.map(s => `
     <div class="ri" style="font-size:12px;">
       <div style="flex:1">${s.name}</div>
-      <button class="add-btn green" style="padding:2px 6px; font-size:9px;" onclick="toggle
+      <button class="add-btn green" style="padding:2px 6px; font-size:9px;" onclick="toggleSkillStatus(${s.id}, 'done')">Acquis</button>
+      <button class="ibtn del" onclick="deleteSkill(${s.id})">✕</button>
+    </div>
+  `).join('');
+
+  doneContainer.innerHTML = doneSkills.length === 0 ? '<div class="empty" style="padding:10px;">Aucun skill maîtrisé</div>' : doneSkills.map(s => `
+    <div class="ri" style="font-size:12px; color:var(--text3)">
+      <div style="flex:1; text-decoration:line-through;">${s.name}</div>
+      <button class="add-btn amber" style="padding:2px 6px; font-size:9px;" onclick="toggleSkillStatus(${s.id}, 'todo')">Reprendre</button>
+      <button class="ibtn del" onclick="deleteSkill(${s.id})">✕</button>
+    </div>
+  `).join('');
+
+  // Playbook renderer mapping
+  const playsList = document.getElementById('plays-list');
+  playsList.innerHTML = plays.length === 0 ? '<div class="empty">Aucune stratégie</div>' : plays.map(p => `
+    <div class="play-card">
+      <div style="display:flex; justify-content:space-between;">
+        <strong style="font-size:13px; color:var(--accent3);">${p.title}</strong>
+        <button class="ibtn del" onclick="deletePlay(${p.id})">✕</button>
+      </div>
+      <div style="font-size:11px; color:var(--text2); margin-top:4px; white-space:pre-wrap;">${p.content}</div>
+    </div>
+  `).join('');
+
+  // Notes renderer mapping
+  const notesList = document.getElementById('basket-notes-list');
+  notesList.innerHTML = notes.length === 0 ? '<div class="empty">Aucune note de coaching</div>' : notes.map(n => `
+    <div class="obj-item">
+      <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-bottom:4px;">
+        <span>${n.date}</span>
+        <button class="ibtn del" onclick="deleteBasketNote(${n.id})">✕</button>
+      </div>
+      <div style="font-size:12px; white-space:pre-wrap;">${n.text}</div>
+    </div>
+  `).join('');
+}
+
+function deleteBasketExercise(id) { S.setArr('exercices_basket', S.getArr('exercices_basket').filter(x => x.id !== id)); renderBasket(); }
+function toggleSkillStatus(id, newStatus) { S.setArr('skills', S.getArr('skills').map(x => { if(x.id === id) x.status = newStatus; return x; })); renderBasket(); }
+function deleteSkill(id) { S.setArr('skills', S.getArr('skills').filter(x => x.id !== id)); renderBasket(); }
+function deletePlay(id) { S.setArr('playbook', S.getArr('playbook').filter(x => x.id !== id)); renderBasket(); }
+function deleteBasketNote(id) { S.setArr('notes_basket', S.getArr('notes_basket').filter(x => x.id !== id)); renderBasket(); }
+
+// ═══════════════════════════════════
+//  DAILY HABITS ROUTINE CALENDAR
+// ═══════════════════════════════════
+function renderRoutine() {
+  const habits = S.getArr('habitudes');
+  const routineExercises = S.getArr('exercices_routine');
+
+  const habitsList = document.getElementById('habitudes-list');
+  if (habits.length === 0) {
+    habitsList.innerHTML = `<div class="empty"><div class="empty-icon">🔥</div>Aucune habitude définie</div>`;
+  } else {
+    habitsList.innerHTML = habits.map(h => `
+      <div class="hr" onclick="toggleHabit(${h.id})">
+        <div class="hc ${h.doneToday ? 'done' : ''}">${h.doneToday ? '✓' : ''}</div>
+        <div style="flex:1; font-size:12px; ${h.doneToday ? 'text-decoration:line-through; color:var(--text3)' : ''}">${h.name}</div>
+        <span class="tag tp" style="font-size:8px;">🔥 ${h.streak || 0} jours</span>
+        <button class="ibtn del" style="margin-left:4px;" onclick="event.stopPropagation(); deleteHabit(${h.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  const exList = document.getElementById('exercices-list');
+  if (routineExercises.length === 0) {
+    exList.innerHTML = `<div class="empty"><div class="empty-icon">💪</div>Aucun exercice de routine</div>`;
+  } else {
+    exList.innerHTML = routineExercises.map(e => `
+      <div class="ri">
+        <div style="flex:1">
+          <strong>${e.name}</strong>
+          <div style="font-size:11px; color:var(--text2)">${e.specs || ''}</div>
+        </div>
+        <button class="ibtn del" onclick="deleteRoutineExercise(${e.id})">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+function toggleHabit(id) {
+  let habits = S.getArr('habitudes');
+  habits = habits.map(h => {
+    if (h.id === id) {
+      h.doneToday = !h.doneToday;
+      if(h.doneToday) {
+        h.streak = (parseInt(h.streak) || 0) + 1;
+      } else {
+        h.streak = Math.max(0, (parseInt(h.streak) || 1) - 1);
+      }
+    }
+    return h;
+  });
+  S.setArr('habitudes', habits);
+  renderRoutine();
+}
+
+function deleteHabit(id) { S.setArr('habitudes', S.getArr('habitudes').filter(x => x.id !== id)); renderRoutine(); }
+function deleteRoutineExercise(id) { S.setArr('exercices_routine', S.getArr('exercices_routine').filter(x => x.id !== id)); renderRoutine(); }
+
+// Persistent Habit Tracker Initialization Logic
+function checkDailyHabitReset() {
+  const today = new Date().toDateString();
+  const lastOpened = localStorage.getItem('lifeos_last_opened_timestamp');
+
+  if (lastOpened && lastOpened !== today) {
+    let habits = S.getArr('habitudes');
+    habits = habits.map(h => {
+      if (!h.doneToday) h.streak = 0; // Breakdown structural streak link if user lapsed day tracker
+      h.doneToday = false;
+      return h;
+    });
+    S.setArr('habitudes', habits);
+  }
+  localStorage.setItem('lifeos_last_opened_timestamp', today);
+}
+
+// ═══════════════════════════════════
+//  WORKSPACE & PROJECTS MECHANICS
+// ═══════════════════════════════════
+function renderWorkspace() {
+  const projects = S.getArr('projets');
+  const tasks = S.getArr('taches');
+  const notes = S.getArr('notes_ws');
+
+  // Render project management mapping views
+  const projContainer = document.getElementById('proj-list');
+  if (projects.length === 0) {
+    projContainer.innerHTML = `<div class="empty" style="grid-column:span 3"><div class="empty-icon">📁</div>Aucun projet actif</div>`;
+  } else {
+    projContainer.innerHTML = projects.map(p => {
+      const projTasks = tasks.filter(t => t.project === p.name);
+      const doneProjTasks = projTasks.filter(t => t.status === 'done');
+      const progressPercent = pct(doneProjTasks.length, projTasks.length) || 0;
+
+      return `
+        <div class="proj-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700; font-size:13px; font-family:'Syne', sans-serif;">${p.name}</div>
+            <button class="ibtn del" onclick="deleteProject(${p.id})">✕</button>
+          </div>
+          <div class="proj-bar"><div style="height:100%; background:var(--accent); width:${progressPercent}%"></div></div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text3)">
+            <span>${projTasks.length} tâches</span>
+            <span>${progressPercent}%</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Kanban tasks compilation board layout split
+  const todoCol = document.getElementById('col-todo');
+  const progressCol = document.getElementById('col-inprogress');
+  const doneCol = document.getElementById('col-done');
+
+  todoCol.innerHTML = ''; progressCol.innerHTML = ''; doneCol.innerHTML = '';
+
+  const todoTasks = tasks.filter(t => t.status === 'todo');
+  const progressTasks = tasks.filter(t => t.status === 'inprogress');
+  const doneTasks = tasks.filter(t => t.status === 'done');
+
+  const mapKanbanItem = (t) => `
+    <div class="kb-card" style="background:var(--bg3); border:1px solid var(--border)">
+      <div style="font-size:12px; font-weight:500; margin-bottom:4px;">${t.desc}</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
+        <span class="tag tk" style="font-size:8px;">${t.project || 'Général'}</span>
+        <div style="display:flex; gap:2px;">
+          ${t.status !== 'todo' ? `<button class="add-btn" style="padding:2px 4px; font-size:8px;" onclick="cycleTaskStatus(${t.id}, 'prev')">◀</button>` : ''}
+          ${t.status !== 'done' ? `<button class="add-btn green" style="padding:2px 4px; font-size:8px;" onclick="cycleTaskStatus(${t.id}, 'next')">▶</button>` : ''}
+          <button class="ibtn del" style="font-size:8px; padding:2px;" onclick="deleteTask(${t.id})">✕</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  todoCol.innerHTML = todoTasks.length === 0 ? '<div class="empty" style="padding:10px;">Aucun</div>' : todoTasks.map(mapKanbanItem).join('');
+  progressCol.innerHTML = progressTasks.length === 0 ? '<div class="empty" style="padding:10px;">Aucun</div>' : progressTasks.map(mapKanbanItem).join('');
+  doneCol.innerHTML = doneTasks.length === 0 ? '<div class="empty" style="padding:10px;">Aucun</div>' : doneTasks.map(mapKanbanItem).join('');
+
+  // Workspace general logs output notes component
+  const wsNotesContainer = document.getElementById('notes-ws-list');
+  if (notes.length === 0) {
+    wsNotesContainer.innerHTML = `<div class="empty"><div class="empty-icon">📝</div>Aucune note enregistrée</div>`;
+  } else {
+    wsNotesContainer.innerHTML = notes.map(n => `
+      <div class="obj-item">
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-bottom:4px;">
+          <strong>${n.title}</strong>
+          <button class="ibtn del" onclick="deleteWorkspaceNote(${n.id})">✕</button>
+        </div>
+        <div style="font-size:11px; color:var(--text2); white-space:pre-wrap;">${n.body}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function deleteProject(id) { S.setArr('projets', S.getArr('projets').filter(x => x.id !== id)); renderWorkspace(); }
+function deleteTask(id) { S.setArr('taches', S.getArr('taches').filter(x => x.id !== id)); renderWorkspace(); }
+function deleteWorkspaceNote(id) { S.setArr('notes_ws', S.getArr('notes_ws').filter(x => x.id !== id)); renderWorkspace(); }
+
+function cycleTaskStatus(id, direction) {
+  const statuses = ['todo', 'inprogress', 'done'];
+  let tasks = S.getArr('taches');
+  tasks = tasks.map(t => {
+    if (t.id === id) {
+      let idx = statuses.indexOf(t.status);
+      if (direction === 'next') idx = Math.min(statuses.length - 1, idx + 1);
+      if (direction === 'prev') idx = Math.max(0, idx - 1);
+      t.status = statuses[idx];
+    }
+    return t;
+  });
+  S.setArr('taches', tasks);
+  renderWorkspace();
+}
+
+// ═══════════════════════════════════
+//  DYNAMIC DATABASE MATRIX SUITE
+// ═══════════════════════════════════
+function renderDatabase() {
+  const tables = S.getArr('db_custom_tables');
+  const listContainer = document.getElementById('db-tables-list');
+  const activeTableContainer = document.getElementById('db-active-table');
+
+  if (tables.length === 0) {
+    listContainer.innerHTML = `<div class="empty"><div class="empty-icon">🗄️</div>Aucune table personnalisée créée</div>`;
+    activeTableContainer.style.display = 'none';
+  } else {
+    listContainer.innerHTML = `
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        ${tables.map(t => `<button class="add-btn" onclick="showActiveTable(${t.id})">📁 ${t.name}</button>`).join('')}
+      </div>
+    `;
+    
+    const activeTableId = localStorage.getItem('lifeos_active_db_table_id');
+    if (activeTableId) {
+      showActiveTable(parseInt(activeTableId));
+    } else {
+      showActiveTable(tables[0].id);
+    }
+  }
+}
+
+function showActiveTable(id) {
+  const tables = S.getArr('db_custom_tables');
+  const table = tables.find(t => t.id === id);
+  const container = document.getElementById('db-active-table');
+  
+  if (!table) {
+    container.style.display = 'none';
+    return;
+  }
+
+  localStorage.setItem('lifeos_active_db_table_id', id);
+  container.style.display = 'block';
+
+  // Extract metadata and properties cleanly
+  const columns = table.columns || ['Nom', 'Description', 'Statut'];
+  const rows = table.rows || [];
+
+  container.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-family:'Syne', sans-serif; font-size:14px; margin:0">Tableau : ${table.name}</h3>
+        <div style="display:flex; gap:6px;">
+          <button class="add-btn green" style="padding:4px 10px; font-size:11px;" onclick="promptAddDatabaseRow(${table.id})">+ Ligne</button>
+          <button class="add-btn coral" style="padding:4px 10px; font-size:11px;" onclick="deleteDatabaseTable(${table.id})">Supprimer table</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="db-table">
+          <thead>
+            <tr>
+              ${columns.map(c => `<th>${c}</th>`).join('')}
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row, rIdx) => `
+              <tr>
+                ${columns.map(col => `<td>${row[col] || ''}</td>`).join('')}
+                <td><button class="ibtn del" onclick="deleteDatabaseRow(${table.id}, ${rIdx})">✕</button></td>
+              </tr>
+            `).join('')}
+            ${rows.length === 0 ? `<tr><td colspan="${columns.length + 1}" style="text-align:center; padding:16px; color:var(--text3)">Tableau vide</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function promptAddDatabaseTable() {
+  const name = prompt("Nom de la nouvelle table :");
+  if (!name || name.trim() === "") return;
+  const colsInput = prompt("Colonnes séparées par des virgules (ex: Titre, Contact, Priorité, Notes) :");
+  if (!colsInput) return;
+  
+  const columns = colsInput.split(',').map(c => c.trim()).filter(c => c.length > 0);
+  if (columns.length === 0) return;
+
+  const tables = S.getArr('db_custom_tables');
+  const newTable = { id: Date.now(), name: name, columns: columns, rows: [] };
+  tables.push(newTable);
+  S.setArr('db_custom_tables', tables);
+  localStorage.setItem('lifeos_active_db_table_id', newTable.id);
+  renderDatabase();
+}
+
+function deleteDatabaseTable(id) {
+  if(!confirm("Supprimer cette table et tout son contenu ?")) return;
+  let tables = S.getArr('db_custom_tables');
+  tables = tables.filter(t => t.id !== id);
+  S.setArr('db_custom_tables', tables);
+  localStorage.removeItem('lifeos_active_db_table_id');
+  renderDatabase();
+}
+
+function promptAddDatabaseRow(tableId) {
+  let tables = S.getArr('db_custom_tables');
+  const tableIdx = tables.findIndex(t => t.id === tableId);
+  if (tableIdx === -1) return;
+
+  const table = tables[tableIdx];
+  const newRow = {};
+  
+  for(let col of table.columns) {
+    const val = prompt(`Valeur pour la colonne [${col}] :`);
+    newRow[col] = val || '';
+  }
+
+  if(!table.rows) table.rows = [];
+  table.rows.push(newRow);
+  tables[tableIdx] = table;
+  S.setArr('db_custom_tables', tables);
+  showActiveTable(tableId);
+}
+
+function deleteDatabaseRow(tableId, rowIndex) {
+  let tables = S.getArr('db_custom_tables');
+  const tableIdx = tables.findIndex(t => t.id === tableId);
+  if (tableIdx === -1) return;
+
+  tables[tableIdx].rows.splice(rowIndex, 1);
+  S.setArr('db_custom_tables', tables);
+  showActiveTable(tableId);
+}
+
+// ═══════════════════════════════════
+//  MODAL INTERACTION ROUTERS & PARSERS
+// ═══════════════════════════════════
+let currentModalContextType = '';
+
+function openGlobalModal(type) {
+  currentModalContextType = type;
+  const modal = document.getElementById('modal');
+  const title = document.getElementById('m-title');
+  const body = document.getElementById('m-body');
+  
+  modal.classList.add('open');
+  body.innerHTML = '';
+
+  const buildField = (lbl, id, htmlInput) => `
+    <div class="field">
+      <label for="${id}">${lbl}</label>
+      ${htmlInput}
+    </div>
+  `;
+
+  if (type === 'revenu' || type === 'depense') {
+    title.innerText = type === 'revenu' ? 'Ajouter un Revenu' : 'Ajouter une Dépense';
+    body.innerHTML = `
+      ${buildField('Description', 'f-desc', `<input type="text" id="f-desc" placeholder="Achat ou rentrée...">`)}
+      ${buildField('Montant (Ar)', 'f-montant', `<input type="number" id="f-montant" placeholder="Ex: 50000">`)}
+      ${buildField('Catégorie', 'f-cat', `
+        <select id="f-cat">
+          ${type === 'revenu' ? `
+            <option value="Salaire">Salaire</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Investissement">Investissement</option>
+            <option value="Autre">Autre</option>
+          ` : `
+            <option value="Nourriture">Nourriture</option>
+            <option value="Transport">Transport</option>
+            <option value="Loisirs">Loisirs</option>
+            <option value="Abonnements">Abonnements</option>
+            <option value="Épargne">Épargne</option>
+            <option value="Santé">Santé</option>
+            <option value="Autre">Autre</option>
+          `}
+        </select>
+      `)}
+      ${buildField('Date', 'f-date', `<input type="date" id="f-date" value="${new Date().toISOString().split('T')[0]}">`)}
+    `;
+  }
+  else if (type === 'objectif') {
+    title.innerText = 'Nouvel Objectif Financier';
+    body.innerHTML = `
+      ${buildField('Nom du projet', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Terrain Ivato">`)}
+      ${buildField('Montant cible (Ar)', 'f-target', `<input type="number" id="f-target" placeholder="Ex: 15000000">`)}
+      ${buildField('Montant de départ (Ar)', 'f-current', `<input type="number" id="f-current" value="0">`)}
+    `;
+  }
+  else if (type === 'new_liste') {
+    title.innerText = 'Nouvelle Liste de Courses';
+    modal.classList.remove('open');
+    promptAddGroceryList();
+  }
+  else if (type === 'seance') {
+    title.innerText = 'Ajouter une Séance Basket';
+    body.innerHTML = `
+      ${buildField('Nom / Focus de la séance', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Handle & Shooting Core">`)}
+      ${buildField('Jour de la semaine', 'f-day', `
+        <select id="f-day">
+          <option value="Lundi">Lundi</option><option value="Mardi">Mardi</option>
+          <option value="Mercredi">Mercredi</option><option value="Jeudi">Jeudi</option>
+          <option value="Vendredi">Vendredi</option><option value="Samedi">Samedi</option>
+          <option value="Dimanche">Dimanche</option>
+        </select>
+      `)}
+      ${buildField('Notes additionnelles', 'f-desc', `<textarea id="f-desc" placeholder="Exercices spécifiques, séries..."></textarea>`)}
+    `;
+  }
+  else if (type === 'skill') {
+    title.innerText = 'Ajouter un Skill Basket';
+    body.innerHTML = `
+      ${buildField('Nom du Skill / Mouvement', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Crossover Drop step">`)}
+    `;
+  }
+  else if (type === 'play') {
+    title.innerText = 'Ajouter une Stratégie (Playbook)';
+    body.innerHTML = `
+      ${buildField('Titre du système', 'f-title', `<input type="text" id="f-title" placeholder="Ex: Pick & Roll Horns">`)}
+      ${buildField('Détails tactiques', 'f-content', `<textarea id="f-content" placeholder="Description des mouvements joueurs..."></textarea>`)}
+    `;
+  }
+  else if (type === 'note_basket') {
+    title.innerText = 'Nouvelle Note Coaching';
+    body.innerHTML = `
+      ${buildField('Contenu de la note', 'f-text', `<textarea id="f-text" placeholder="Axes de progression, remarques match..."></textarea>`)}
+    `;
+  }
+  else if (type === 'habitude') {
+    title.innerText = 'Nouvelle Habitude (Routine)';
+    body.innerHTML = `
+      ${buildField('Nom de l\'habitude', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Méditation 10m, Lecture...">`)}
+    `;
+  }
+  else if (type === 'exercice_routine') {
+    title.innerText = 'Ajouter un Exercice Physique';
+    body.innerHTML = `
+      ${buildField('Nom de l\'exercice', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Pompes lestées">`)}
+      ${buildField('Séries / Répétitions', 'f-specs', `<input type="text" id="f-specs" placeholder="Ex: 4x12 reps">`)}
+    `;
+  }
+  else if (type === 'projet') {
+    title.innerText = 'Créer un Projet Work';
+    body.innerHTML = `
+      ${buildField('Nom du Projet', 'f-name', `<input type="text" id="f-name" placeholder="Ex: Refonte Plateforme Web">`)}
+    `;
+  }
+  else if (type === 'tache') {
+    const projects = S.getArr('projets');
+    title.innerText = 'Nouvelle Tâche Kanban';
+    body.innerHTML = `
+      ${buildField('Description de la tâche', 'f-desc', `<input type="text" id="f-desc" placeholder="Faire les maquettes...">`)}
+      ${buildField('Projet associé', 'f-project', `
+        <select id="f-project">
+          <option value="">Aucun (Général)</option>
+          ${projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
+        </select>
+      `)}
+    `;
+  }
+  else if (type === 'note_ws') {
+    title.innerText = 'Créer une Note Workspace';
+    body.innerHTML = `
+      ${buildField('Titre de la note', 'f-title', `<input type="text" id="f-title" placeholder="Réunion Client X">`)}
+      ${buildField('Contenu', 'f-body', `<textarea id="f-body" placeholder="Points abordés..."></textarea>`)}
+    `;
+  }
+  else if (type === 'db_table') {
+    modal.classList.remove('open');
+    promptAddDatabaseTable();
+  }
+}
+
+function submitModalData() {
+  const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+  
+  if (currentModalContextType === 'revenu' || currentModalContextType === 'depense') {
+    const desc = getVal('f-desc');
+    const mnt = getVal('f-montant');
+    if (!desc || !mnt) return;
+    S.push('transactions', {
+      id: Date.now(),
+      type: currentModalContextType,
+      desc: desc,
+      montant: parseInt(mnt),
+      cat: getVal('f-cat'),
+      date: getVal('f-date')
+    });
+    renderFinance();
+  }
+  else if (currentModalContextType === 'objectif') {
+    const name = getVal('f-name');
+    const target = getVal('f-target');
+    if (!name || !target) return;
+    S.push('objectifs', {
+      id: Date.now(),
+      name: name,
+      target: parseInt(target),
+      current: parseInt(getVal('f-current') || 0)
+    });
+    renderObjectifs();
+  }
+  else if (currentModalContextType === 'seance') {
+    const name = getVal('f-name');
+    if (!name) return;
+    S.push('exercices_basket', { id: Date.now(), name: name, day: getVal('f-day'), desc: getVal('f-desc') });
+    renderBasket();
+  }
+  else if (currentModalContextType === 'skill') {
+    const name = getVal('f-name');
+    if (!name) return;
+    S.push('skills', { id: Date.now(), name: name, status: 'todo' });
+    renderBasket();
+  }
+  else if (currentModalContextType === 'play') {
+    const title = getVal('f-title');
+    if (!title) return;
+    S.push('playbook', { id: Date.now(), title: title, content: getVal('f-content') });
+    renderBasket();
+  }
+  else if (currentModalContextType === 'note_basket') {
+    const text = getVal('f-text');
+    if (!text) return;
+    S.push('notes_basket', { id: Date.now(), date: new Date().toLocaleDateString('fr-FR'), text: text });
+    renderBasket();
+  }
+  else if (currentModalContextType === 'habitude') {
+    const name = getVal('f-name');
+    if (!name) return;
+    S.push('habitudes', { id: Date.now(), name: name, doneToday: false, streak: 0 });
+    renderRoutine();
+  }
+  else if (currentModalContextType === 'exercice_routine') {
+    const name = getVal('f-name');
+    if (!name) return;
+    S.push('exercices_routine', { id: Date.now(), name: name, specs: getVal('f-specs') });
+    renderRoutine();
+  }
+  else if (currentModalContextType === 'projet') {
+    const name = getVal('f-name');
+    if (!name) return;
+    S.push('projets', { id: Date.now(), name: name });
+    renderWorkspace();
+  }
+  else if (currentModalContextType === 'tache') {
+    const desc = getVal('f-desc');
+    if (!desc) return;
+    S.push('taches', { id: Date.now(), desc: desc, project: getVal('f-project'), status: 'todo' });
+    renderWorkspace();
+  }
+  else if (currentModalContextType === 'note_ws') {
+    const title = getVal('f-title');
+    if (!title) return;
+    S.push('notes_ws', { id: Date.now(), title: title, body: getVal('f-body') });
+    renderWorkspace();
+  }
+
+  document.getElementById('modal').classList.remove('open');
+}
+
+// ═══════════════════════════════════
+//  PAGE CORE MANAGER HUB
+// ═══════════════════════════════════
+function renderPage(id) {
+  if (id === 'dashboard') renderDashboard();
+  else if (id === 'finance') renderFinance();
+  else if (id === 'basket') renderBasket();
+  else if (id === 'routine') renderRoutine();
+  else if (id === 'workspace') renderWorkspace();
+  else if (id === 'database') renderDatabase();
+}
+
+// ═══════════════════════════════════
+//  APPLICATION BINDERS & LISTENERS
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  checkLogin();
+  checkDailyHabitReset();
+  renderDashboard();
+
+  // Navigation binders
+  document.querySelectorAll('.ni').forEach(btn => {
+    btn.addEventListener('click', () => nav(btn.getAttribute('data-nav'), btn));
+  });
+
+  // Tab switcher links
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      const p = t.parentNode;
+      p.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      switchTab(t.getAttribute('data-tab'), t.getAttribute('data-group'));
+    });
+  });
+
+  // Modal open orchestrator linkage
+  document.querySelectorAll('[data-modal]').forEach(b => {
+    b.addEventListener('click', () => openGlobalModal(b.getAttribute('data-modal')));
+  });
+
+  document.getElementById('m-ok-btn').addEventListener('click', submitModalData);
+  document.getElementById('m-cancel-btn').addEventListener('click', () => {
+    document.getElementById('modal').classList.remove('open');
+  });
+  
+  document.getElementById('modal').addEventListener('click', e => { 
+    if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); 
+  });
+
+  // Chart configuration actions integration
+  document.getElementById('pb-6m').addEventListener('click', e => { 
+    document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); 
+    e.target.classList.add('on'); 
+    buildChart('6m'); 
+  });
+  document.getElementById('pb-1a').addEventListener('click', e => { 
+    document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); 
+    e.target.classList.add('on'); 
+    buildChart('1a'); 
+  });
+  document.getElementById('pb-3a').addEventListener('click', e => { 
+    document.querySelectorAll('.pb').forEach(b => b.classList.remove('on')); 
+    e.target.classList.add('on'); 
+    buildChart('3a'); 
+  });
+
+  // Core Keyboard event handling overrides
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('modal').classList.remove('open');
+    if (e.key === 'Enter' && document.getElementById('modal').classList.contains('open') && document.activeElement.tagName !== 'TEXTAREA') {
+      submitModalData();
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -139,135 +139,60 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
    ========================================= */
 
 @media (max-width: 768px) {
-  
-  /* 1. Structure globale */
-  .app {
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-  }
 
-  /* 2. Barre de navigation (passe du côté vers le bas) */
+  .app { flex-direction: column; height: 100vh; height: 100dvh; }
+
+  /* Sidebar -> barre de nav fixe en bas */
   .sb {
     width: 100%;
-    height: 70px;
+    height: 64px;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    display: flex;
+    bottom: 0; left: 0;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
     border-right: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: #121212; /* Modifie cette couleur si besoin */
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
     z-index: 100;
+    overflow: visible;
+    padding: 0;
   }
+  .sb .logo, .sb .ns .nl, .sb .sf { display: none; }
+  .sb .ns { display: contents; }
+  .sb .ni {
+    flex-direction: column;
+    gap: 2px;
+    width: auto;
+    flex: 1;
+    padding: 6px 2px;
+    font-size: 9px;
+    text-align: center;
+    border-radius: 0;
+    border: none !important;
+    background: none !important;
+  }
+  .sb .ni.active { color: var(--accent2); }
+  .sb .nic { width: 22px; height: 22px; font-size: 14px; background: none !important; box-shadow: none !important; }
+  .sb .nbadge { position: absolute; top: 2px; margin-left: 14px; }
 
-  /* On masque le texte des menus dans la barre du bas */
-  .sb .menu-text {
-    display: none; 
-  }
+  .main { width: 100%; height: calc(100% - 64px); padding: 14px; padding-bottom: 24px; overflow-y: auto; }
 
-  /* 3. Zone principale */
-  .main {
-    width: 100%;
-    height: calc(100% - 70px);
-    padding: 15px;
-    padding-bottom: 80px;
-    overflow-y: auto;
-  }
+  .g4 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(2, 1fr); }
+  .g2 { grid-template-columns: 1fr; }
 
-  /* 4. Grilles adaptatives */
-  .g3, .g4 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-  }
+  .page-title { font-size: 19px; }
 
-  /* Conteneurs larges */
-  .chart-container, .transactions-table {
-    width: 100%;
-    grid-column: 1 / -1;
-    overflow-x: auto;
-  }
+  .modal-bg { padding: 0; align-items: flex-end; }
+  .modal { width: 100%; max-width: 100%; border-radius: 16px 16px 0 0; max-height: 90vh; }
+  .field input, .field select, .field textarea { font-size: 16px; }
 
-  /* 5. Ajustement des textes et boutons */
-  h1 {
-    font-size: 1.5rem;
-  }
-  
-  h2 {
-    font-size: 1.2rem;
-  }
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { white-space: nowrap; }
 
-  button {
-    padding: 12px 20px;
-    font-size: 1rem;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-/* =========================================
-     6. ADAPTATION DES FENÊTRES (MODALS)
-     ========================================= */
-
-  /* Le fond semi-transparent de la modal */
-  .modal-bg, .modal-overlay { 
-    display: flex !important; /* On force le mode flex pour centrer */
-    align-items: center;     /* Centre verticalement */
-    justify-content: center;  /* Centre horizontalement */
-    padding: 15px;            /* Évite que la modal colle aux bords de l'écran */
-    background-color: rgba(0, 0, 0, 0.8); /* Fond bien sombre pour détacher la boîte */
-  }
-
-  /* La boîte blanche/sombre qui contient le formulaire */
-  .modal, .modal-content, [class*="modal-box"] {
-    width: 100% !important;   /* Elle prend toute la largeur disponible... */
-    max-width: 400px;         /* ...sans jamais dépasser une taille raisonnable */
-    max-height: 85vh;         /* Sécurité : elle ne dépassera jamais 85% de la hauteur de l'écran */
-    overflow-y: auto;         /* Si le formulaire est trop long, on peut scroller dedans */
-    border-radius: 16px;      /* Des coins un peu plus arrondis, plus "natif" sur smartphone */
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-  /* Si tes modals contiennent des inputs (champs de texte) */
-  .modal input, .modal select, .modal textarea {
-    font-size: 16px !important; /* ASTUCE : Évite le zoom automatique agaçant d'iOS/Android quand on clique dessus */
-    padding: 12px;
-    width: 100%;
-    margin-bottom: 15px;
-  }
-/* =========================================
-     CORRECTIONS ET LOGO (MOBILE)
-     ========================================= */
-
-  /* 1. On masque le logo/texte de marque pour laisser la place aux boutons de navigation */
-  .sb h1, .sb h2, .sb .logo, .sb .brand, .sb p:first-child {
-    display: none !important;
-  }
-
-  /* 2. On force la barre du bas à bien centrer les boutons restants */
-  .sb {
-    justify-content: space-around !important;
-    padding: 0 10px;
-  }
-
-  /* 3. On répare les boutons côte à côte dans la modal */
-  .modal button, .modal-content button, [class*="modal"] button {
-    width: auto !important; /* On annule le 100% qui écrasait le voisin */
-    flex: 1;                /* Ils partagent l'espace à 50/50 */
-    margin: 0 5px;          /* Un petit espace entre les deux boutons */
-  }
-
-  /* S'assurer que le conteneur des boutons aligne bien en ligne */
-  .modal .modal-footer, .modal div:has(button) {
-    display: flex !important;
-    flex-direction: row !important;
-    width: 100%;
-    margin-top: 15px;
-  }
-} 
+  .db-table { display: block; overflow-x: auto; white-space: nowrap; }
+}
 /* --- FIN DE LA MEDIA QUERY MOBILE --- */
   
 </style>
@@ -1703,8 +1628,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-</script>
 <script>
+function toast(msg, type = '') {
+  let c = document.getElementById('toast-container');
+  if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+function confirmAction(message, onYes) {
+  const wrap = document.createElement('div');
+  wrap.className = 'modal-bg open';
+  wrap.innerHTML = `<div class="modal" style="text-align:center">
+    <h3>${message}</h3>
+    <div class="mbts">
+      <button class="btn-no" id="ca-no">Annuler</button>
+      <button class="btn-ok" style="background:var(--coral)" id="ca-yes">Confirmer</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+  wrap.querySelector('#ca-no').onclick = () => wrap.remove();
+  wrap.querySelector('#ca-yes').onclick = () => { wrap.remove(); onYes(); };
+}
+</script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')

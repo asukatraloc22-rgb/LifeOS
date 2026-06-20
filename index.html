@@ -510,7 +510,24 @@ document.getElementById('login-btn').addEventListener('click', () => {
   } else {
     if (entered === storedPass) {
       sessionStorage.setItem(SESSION_AUTH_KEY, 'ok');
+      document.getElementById('login-btn').addEventListener('click', () => {
+  const entered = document.getElementById('login-pwd').value;
+  const storedPass = localStorage.getItem(PWD_STORAGE_KEY);
+  
+  if (!storedPass) {
+    if (entered.trim().length < 4) {
+      document.getElementById('login-error').innerText = "Le mot de passe doit faire 4 caractères minimum.";
+      return;
+    }
+    localStorage.setItem(PWD_STORAGE_KEY, entered);
+    sessionStorage.setItem(SESSION_AUTH_KEY, 'ok');
+    document.getElementById('login-screen').style.display = 'none';
+    location.reload();
+  } else {
+    if (entered === storedPass) {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'ok');
       document.getElementById('login-screen').style.display = 'none';
+      location.reload(); // <--- Cette ligne a été ajoutée pour débloquer l'écran noir
     } else {
       document.getElementById('login-error').innerText = "Mot de passe incorrect.";
     }

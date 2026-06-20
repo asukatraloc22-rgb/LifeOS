@@ -234,6 +234,35 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     width: 100%;
     margin-bottom: 15px;
   }
+/* =========================================
+     CORRECTIONS ET LOGO (MOBILE)
+     ========================================= */
+
+  /* 1. On masque le logo/texte de marque pour laisser la place aux boutons de navigation */
+  .sb h1, .sb h2, .sb .logo, .sb .brand, .sb p:first-child {
+    display: none !important;
+  }
+
+  /* 2. On force la barre du bas à bien centrer les boutons restants */
+  .sb {
+    justify-content: space-around !important;
+    padding: 0 10px;
+  }
+
+  /* 3. On répare les boutons côte à côte dans la modal */
+  .modal button, .modal-content button, [class*="modal"] button {
+    width: auto !important; /* On annule le 100% qui écrasait le voisin */
+    flex: 1;                /* Ils partagent l'espace à 50/50 */
+    margin: 0 5px;          /* Un petit espace entre les deux boutons */
+  }
+
+  /* S'assurer que le conteneur des boutons aligne bien en ligne */
+  .modal .modal-footer, .modal div:has(button) {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100%;
+    margin-top: 15px;
+  }
 } 
 /* --- FIN DE LA MEDIA QUERY MOBILE --- */
   

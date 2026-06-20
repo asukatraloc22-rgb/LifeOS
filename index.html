@@ -203,6 +203,37 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     width: 100%;
     margin-bottom: 10px;
   }
+/* =========================================
+     6. ADAPTATION DES FENÊTRES (MODALS)
+     ========================================= */
+
+  /* Le fond semi-transparent de la modal */
+  .modal-bg, .modal-overlay { 
+    display: flex !important; /* On force le mode flex pour centrer */
+    align-items: center;     /* Centre verticalement */
+    justify-content: center;  /* Centre horizontalement */
+    padding: 15px;            /* Évite que la modal colle aux bords de l'écran */
+    background-color: rgba(0, 0, 0, 0.8); /* Fond bien sombre pour détacher la boîte */
+  }
+
+  /* La boîte blanche/sombre qui contient le formulaire */
+  .modal, .modal-content, [class*="modal-box"] {
+    width: 100% !important;   /* Elle prend toute la largeur disponible... */
+    max-width: 400px;         /* ...sans jamais dépasser une taille raisonnable */
+    max-height: 85vh;         /* Sécurité : elle ne dépassera jamais 85% de la hauteur de l'écran */
+    overflow-y: auto;         /* Si le formulaire est trop long, on peut scroller dedans */
+    border-radius: 16px;      /* Des coins un peu plus arrondis, plus "natif" sur smartphone */
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Si tes modals contiennent des inputs (champs de texte) */
+  .modal input, .modal select, .modal textarea {
+    font-size: 16px !important; /* ASTUCE : Évite le zoom automatique agaçant d'iOS/Android quand on clique dessus */
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 15px;
+  }
 } 
 /* --- FIN DE LA MEDIA QUERY MOBILE --- */
   

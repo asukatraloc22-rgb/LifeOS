@@ -12,6 +12,8 @@ const SECTION_LABEL: Record<string, string> = {
 export function Sidebar() {
   const sections = ['main', 'life', 'system'] as const;
   const lock = useAuthStore((s) => s.lock);
+  const userEmail = useAuthStore((s) => s.userEmail);
+  const mode = useAuthStore((s) => s.mode);
 
   return (
     <aside className="w-[210px] shrink-0 bg-bg-2 border-r border-border flex flex-col h-screen overflow-y-auto">
@@ -61,9 +63,11 @@ export function Sidebar() {
       <div className="mt-auto p-2 border-t border-border">
         <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-bg-3">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-pink flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-            R
+            {(userEmail?.[0] ?? 'R').toUpperCase()}
           </div>
-          <div className="text-[11px] text-text-2 truncate flex-1">Mon espace</div>
+          <div className="text-[11px] text-text-2 truncate flex-1">
+            {mode === 'supabase' && userEmail ? userEmail : 'Mon espace'}
+          </div>
           <button
             onClick={lock}
             title="Verrouiller"

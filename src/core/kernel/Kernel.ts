@@ -1,26 +1,21 @@
-import { LocalStorageAdapter, type IStorageAdapter } from '../storage/StorageAdapter';
+import { LocalStorageAdapter } from '../storage/StorageAdapter';
+import { DynamicStorageAdapter } from '../storage/DynamicStorageAdapter';
 import { migrateLegacyData } from './migrateLegacyData';
 import { logger } from '../logger/Logger';
 
-export const APP_VERSION = '2.0.0';
+export const APP_VERSION = '2.1.0';
 
 interface KernelState {
   isOnline: boolean;
   bootedAt: string;
 }
 
-/**
- * The Kernel is the single source of truth for cross-cutting app services:
- * storage backend, connectivity, boot sequence, versioning.
- * Modules should never instantiate their own storage adapter — they get it
- * from here, so swapping local -> Supabase later is a one-line change.
- */
 class Kernel {
-  readonly storage: IStorageAdapter;
+  readonly storage: DynamicStorageAdapter;
   state: KernelState;
 
   constructor() {
-    this.storage = new LocalStorageAdapter();
+    this.storage = new DynamicStorageAdapter(new LocalStorageAdapter());
     this.state = {
       isOnline: navigator.onLine,
       bootedAt: new Date().toISOString(),

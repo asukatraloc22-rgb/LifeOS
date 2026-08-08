@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from './navigation';
 import { cn } from '@/shared/utils/cn';
+import { useAuthStore } from '@/core/auth/useAuthStore';
 
 const SECTION_LABEL: Record<string, string> = {
   main: '',
@@ -10,6 +11,7 @@ const SECTION_LABEL: Record<string, string> = {
 
 export function Sidebar() {
   const sections = ['main', 'life', 'system'] as const;
+  const lock = useAuthStore((s) => s.lock);
 
   return (
     <aside className="w-[210px] shrink-0 bg-bg-2 border-r border-border flex flex-col h-screen overflow-y-auto">
@@ -61,7 +63,14 @@ export function Sidebar() {
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-pink flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             R
           </div>
-          <div className="text-[11px] text-text-2 truncate">Mon espace</div>
+          <div className="text-[11px] text-text-2 truncate flex-1">Mon espace</div>
+          <button
+            onClick={lock}
+            title="Verrouiller"
+            className="text-text-3 hover:text-text text-xs shrink-0"
+          >
+            🔒
+          </button>
         </div>
       </div>
     </aside>
